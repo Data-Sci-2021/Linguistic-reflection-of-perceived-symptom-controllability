@@ -1,0 +1,832 @@
+---
+title: "Linguistic analysis for symptom controllability"
+author: "Yan Wang"
+date: "13/12/2021"
+output: 
+  github_document:
+    toc: true
+    number_sections: true
+---
+
+**This script is a new replacement**
+
+# Load all datasets
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = NA, fig.path = "images/", dev = "png",dpi = 300,cache = TRUE)
+                     
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(lme4)
+SQR<-read_excel("~/Desktop/DS4Ling-2021/old repository/private/DS4Lingdataset/SQR.xlsx")
+OEQ<-read_excel("~/Desktop/DS4Ling-2021/old repository/private/DS4Lingdataset/OEQ- text.xlsx")
+Metadata<-read_excel("~/Desktop/DS4Ling-2021/old repository/private/DS4Lingdataset/Metadata of participants.xlsx")
+```
+
+## Description
+
+SQR is a data set that contains participants ID, time of controllability assessmen [Administration Number], 3 symptoms [S1, S2, S3] and 3 controllability scores [S1Cont, S2Cont, S3Cont]; OEQ contains ID, symptom names and answers for the three questions: 1. "How does the symptom make you feel and what's the cause?", 2. "How does the symptom affect you?" 3."Have you tried anything? Is it helpful?"; Metadata contains ID and sociodemographics, including age, marrige status, employment, education, race, ethnicity. 
+
+# Data preparation
+
+## Calculate the dependent variable = the difference of symptom controllability scores at baseline and 8 weeks (at the end of the intervention)
+
+```{r}
+SQR_8<- SQR %>% filter(`Administration Number`== "8 week f/u")
+SQR_BL<- SQR %>% filter(`Administration Number`=="Baseline (week 0)")
+names(SQR_8)[3:9]<-c("Time", "S1Cont", "S2Cont", "S3Cont" , "S1", "S2", "S3")
+names(SQR_BL)[3:9]<-c("Time", "S1Cont", "S2Cont", "S3Cont" , "S1", "S2", "S3")
+sum(is.na(SQR_BL$S1Cont))
+sum(is.na(SQR_8$S1Cont))
+SQR_8BL<-inner_join(SQR_8, SQR_BL, by=c("Participant ID", "GOGID", "S1", "S2", "S3"))
+names(SQR_8BL)
+Df1<-SQR_8BL %>% dplyr::select(1,2, 7:9, 11:13, 4:6)
+names(Df1)[1:11]<-c("ID", "GOGID", "S1", "S2", "S3", "BLS1", "BLS2", "BLS3", "8wkS1","8wkS2", "8wkS3" )
+```
+
+## Reshape Df1 because we want one patient has multiple entries for symptoms, baseline contrallability scores, and controllability scores
+
+```{r}
+Df1_1<-Df1 %>% melt(id.vars = c("ID", "GOGID"), measure.vars =c("S1", "S2", "S3"), variable.name = "SymptomNo", value.name = "Symptom") 
+Df1_2<-Df1 %>% melt(id.vars = c("ID", "GOGID"), measure.vars =c( "8wkS1", "8wkS2", "8wkS3"), variable.name = "toy", value.name = "8wkContr")
+Df1_3<-Df1 %>% melt(id.vars = c("ID", "GOGID"), measure.vars =c("BLS1", "BLS2", "BLS3"), variable.name = "toy", value.name = "BSContr")
+colnames(Df1_1)
+colnames(Df1_2)
+colnames(Df1_3)
+levels(Df1_2$toy)[1]<-"S1"
+levels(Df1_2$toy)[2]<-"S2"
+levels(Df1_2$toy)[3]<-"S3"
+names(Df1_2)[3]<-"SymptomNo"
+levels(Df1_3$toy)[1]<-"S1"
+levels(Df1_3$toy)[2]<-"S2"
+levels(Df1_3$toy)[3]<-"S3"
+names(Df1_3)[3]<-"SymptomNo"
+Df1_4<- inner_join(Df1_1, Df1_2, by= c("ID", "GOGID", "SymptomNo")) %>% inner_join(., Df1_3, by= c("ID", "GOGID", "SymptomNo")) %>% na.omit()
+```
+
+## Merge with OEQ (text data) by Participant ID and Symptom
+```{r}
+names(OEQ)[1:2]<-c("ID", "Symptom")
+Df8BL<-left_join(Df1_4,OEQ, by=c("ID", "Symptom")) %>% na.omit()
+names(Df8BL)[7:9]<-c("FeelingCause", "Effect", "Strategy")
+```
+
+## save the output
+```{r}
+write.csv(Df8BL, "~/Desktop/Df8BL for text analysis.csv")
+```
+
+
+# Extract linguistics features (predictors) for analysis
+
+I used the software LIWC 2015 (http://liwc.wpengine.com/) to extract multiple existing and 10 self-designed word categories; LightSide (http://ankara.lti.cs.cmu.edu/side/) to tag and calculate frequency of the word "control" as verb and noun, respectively. Existing word categories in LIWC include 4 summary language variables (analytical thinking, clout [confidence], authenticity, and emotional tone), 3 general descriptor categories (words per sentence, percent of target words captured by the dictionary, and percent of words in the text that are longer than six letters), 21 standard linguistic dimensions (e.g., percentage of words in the text that are pronouns, articles, auxiliary verbs, etc.), 41 word categories tapping psychological constructs (e.g., affect, cognition, biological processes, drives), 6 personal concern categories (e.g., work, home, leisure activities), 5 informal language markers (assents, fillers, swear words, netspeak), and 12 punctuation categories (periods, commas, etc). 
+I saved all the results in the file "Result8BLSDWRITE.xlsx"
+
+# Load the full dataset for analysis
+
+```{r}
+Df<-read.csv("~/Desktop/DS4Ling-2021/old repository/private/DS4Lingdataset/Results8BLSDWRITE.csv")
+Df$controlNN[is.na(Df$controlNN)]=0
+Df$controlVB[is.na(Df$controlVB)]=0
+Df[is.na(Df)]
+Df$controlNN<-Df$controlNN/Df$WC*100
+Df$controlVB<-Df$controlVB/Df$WC*100
+Df<- Df %>% dplyr::select(2, 4:7,11,106:112, 12:105)
+names(Df)
+```
+
+Df description: 
+  "ID"- participant ID 
+  "Employment" - Employed vs unemployed
+  "Marriage" - Currently married, divorced, Living with partner/significant other, never married, separated, widowed
+  "race" -  American Indian, bi/Multi-racial Black or African American, White, other, unknown 
+  "ethinicity" - latino, not latino, don not know
+  "Age"
+  "Formaleducationyears" - years of formal education 
+  "SymptomNo"- Symptom number participant worked on (i.e., S1, S2, S3)
+  "Symptom" - Symptom participant worked on (e.g., pain, nausea)     
+  "X8wkContro" - symptom controllability score changes at 8 week post intervention
+  "BSContr" - baseline controllability score
+  "WC" - the total number of words in participant posts
+  "WPS" - the number of words per post
+  
+The rest of the variable are the percentage of that specific word category or punctuation category of the total number words in the posts. 
+For example, 
+  "symptom" - the percentage of symptom word category (e.g., drowsy, lose hair) of the total number of words in the post (range:0-100)
+  "positive.adj" - the percentage of positive.adj symptom word category (e.g., steady, mild, good) of the total number of words in the post (0-100) 
+    
+# Merge the datasets to obtain the sociodemographic factors
+```{r}
+names(Metadata)
+Metadata<- Metadata[, c(1, 3, 8:12)]
+Dftoy<-left_join(Df, Metadata, by="ID") %>% select(1 , 108:113, everything())
+```
+
+# Descriptive stats of the controllability score changes @ baseline and 8 wks
+
+## Baseline controllability distribution - normality assumed
+```{r Baseline controllability}
+Df<- Dftoy %>% na.omit()
+ggplot(Df)+ 
+  geom_histogram(binwidth=0.05, color="blue",aes(x= BSContr, y=..density.., fill=..count..))+ 
+  stat_function(fun=dnorm,color="blue",
+                args=list(mean=mean(Df$BSContr),sd=sd(Df$BSContr)))
+#QQplots
+qq<-data.frame(c(Df,qqnorm(Df$BSContr)))
+ggplot(qq,aes(x=x,y=y,legend.position="none"))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="Q-Q Normal Plot",x="Theoretic",y="Observed")+
+  theme_bw()
+##boxplots
+ggplot(Df)+
+  geom_boxplot(aes(Df$BSContr))+
+  theme_bw()+
+  theme(legend.position="none")
+shapiro.test(Df$BSContr)
+#install.packages("pastecs")
+library(pastecs)
+stat.desc(Df$BSContr)
+quantile(Df$BSContr, 0.75)-quantile(Df$BSContr, 0.25)
+table(Df$BSContr)
+```
+
+## 8 week controllability distribution - normality violated
+```{r 8 week controllability}
+Df<- Df %>% na.omit()
+ggplot(Df)+ 
+  geom_histogram(binwidth=0.05, color="blue",aes(x= X8wkContr, y=..density.., fill=..count..))+ 
+  stat_function(fun=dnorm,color="blue",
+                args=list(mean=mean(Df$BSContr),sd=sd(Df$X8wkContr)))
+#QQplots
+qq<-data.frame(c(Df,qqnorm(Df$X8wkContr)))
+ggplot(qq,aes(x=x,y=y,legend.position="none"))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="Q-Q Normal Plot",x="Theoretic",y="Observed")+
+  theme_bw()
+##boxplots
+ggplot(Df)+
+  geom_boxplot(aes(Df$X8wkContr))+
+  theme_bw()+
+  theme(legend.position="none")
+shapiro.test(Df$X8wkContr)
+stat.desc(Df$X8wkContr)
+quantile(Df$X8wkContr, 0.75)-quantile(Df$X8wkContr, 0.25)
+table(Df$X8wkContr)
+```
+# Sample descriptive stats - sample size (157 participants) is bigger than the sample size (112 participants and 314 posts) I use in mixed effect model. 
+Participants are predominantly married or Living with partner/significant other(75.16%), white (93%), non-hispanic (96.18%), unemployed (59.24%). 
+The mean of age is 58.18 (SD = 9.72). The average of formal years of education is 14.4 (SD=2.72)
+```{r sociodemographic}
+names(Metadata)
+Metadata<-na.omit(Metadata)
+table(Metadata$Marriage) %>% addmargins()
+table(Metadata$race)%>% addmargins()
+table(Metadata$`ethinicity (latio)`)%>% addmargins()
+table(Metadata$Employment)%>% addmargins() 
+#since there is only one individual chose never employed, I will code it as No
+Metadata$Employment[Metadata$Employment=="Never employed"]<-"No"
+#Age----
+library(pastecs)
+stat.desc(Metadata$Age)
+quantile(Metadata$Age, 0.75,na.rm = TRUE)-quantile(Metadata$Age, 0.25, na.rm = TRUE)
+ggplot(Metadata)+ 
+  geom_histogram(binwidth=0.1, color="blue",aes(x=Age, y=..density.., fill=..count..))+ 
+  stat_function(fun=dnorm,color="blue",
+                args=list(mean=mean(Metadata$Age),sd=sd(Metadata$Age)))
+#QQplots
+qq<-data.frame(c(Metadata,qqnorm(Metadata$Age)))
+ggplot(qq,aes(x=x,y=y,legend.position="none"))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="Q-Q Normal Plot",x="Theoretic",y="Observed")+
+  theme_bw()
+##boxplots
+ggplot(Metadata)+
+  geom_boxplot(aes(Metadata$Age))+
+  theme_bw()+
+  theme(legend.position="none")
+shapiro.test(Metadata$Age)
+#Formal years of education normality is violated-----
+stat.desc(Metadata$Formaleducationyears)
+quantile(Metadata$Formaleducationyears, 0.75,na.rm = TRUE)-quantile(Metadata$Formaleducationyears, 0.25, na.rm = TRUE)
+ggplot(Metadata)+ 
+  geom_histogram(binwidth=0.5, color="blue",aes(x=Formaleducationyears, y=..density.., fill=..count..))+ 
+  stat_function(fun=dnorm,color="blue",
+                args=list(mean=mean(Metadata$Formaleducationyears),sd=sd(Metadata$Formaleducationyears)))
+#QQplots
+qq<-data.frame(c(Metadata,qqnorm(Metadata$Formaleducationyears)))
+ggplot(qq,aes(x=x,y=y,legend.position="none"))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="Q-Q Normal Plot",x="Theoretic",y="Observed")+
+  theme_bw()
+##boxplots
+ggplot(Metadata)+
+  geom_boxplot(aes(Metadata$Formaleducationyears))+
+  theme_bw()+
+  theme(legend.position="none")
+shapiro.test(Metadata$Formaleducationyears)
+```
+
+# Preliminary bivariate correlation between the dependent variable and potential predictors - pearson correlation
+```{r Bivariate correlation}
+names(Dftoy)
+Df<-Dftoy[, -110]
+library(Hmisc)
+library(corrgram)
+# there is no variation in "Quote"
+res <- cor(Df[10:112])
+round(res, 2)[,1]
+#significant and marginal significant
+cor.test(Df$X8wkContr, Df$BSContr)
+cor.test(Df$X8wkContr, Df$WC)
+cor.test(Df$X8wkContr, Df$symptom)
+cor.test(Df$X8wkContr, Df$controlled)
+cor.test(Df$X8wkContr, Df$controlNN)
+cor.test(Df$X8wkContr, Df$anx)
+cor.test(Df$X8wkContr, Df$feel)
+cor.test(Df$X8wkContr, Df$body)
+cor.test(Df$X8wkContr, Df$ingest)
+cor.test(Df$X8wkContr, Df$focuspresent)
+cor.test(Df$X8wkContr, Df$money)
+cor.test(Df$X8wkContr, Df$informal)
+cor.test(Df$X8wkContr, Df$nonflu)
+cor.test(Df$X8wkContr, Df$negate)
+cor.test(Df$X8wkContr, Df$discrep)
+cor.test(Df$X8wkContr, Df$certain)
+cor.test(Df$X8wkContr, Df$Analytic)
+cor.test(Df$X8wkContr, Df$Sixltr)
+cor.test(Df$X8wkContr, Df$prep)
+corrgram(Df %>% select (X8wkContr,BSContr, WC, symptom, controlled, controlNN,anx,feel, body, ingest, focuspresent, money, informal, nonflu, negate, discrep, certain, Analytic, Sixltr, prep), order=FALSE, lower.panel=panel.shade,
+  upper.panel=panel.pie, text.panel=panel.txt,
+  main="IVs and DV correlation")
+## As we can see posemo and tone are highly correlated, symptom and health category are highly correlated as well. 
+```
+
+# Model buiding - Mixed-effect regression model
+
+Based on theories and bivariate correlation test results , I have some ideas of candidate predictors. 
+Since this analysis is exploratory in nature and we have a lot of potential predictors. I will explore a few approaches of model building
+
+Random effect: use participant ID
+Covariate:social demographic factors and symptom selected, e.g., marriage status, age, education, employment, race, ethnicity because patients were predominantly non-Hispanic white)
+Full purpose-oriented predictor selection
+
+## Convenience functions for model comparison
+
+```{r convergence code}
+##Get convergence code for a single model
+##verbose: TRUE to return full convergence code, FALSE to return logical
+##checkSingular: TRUE to count singular fit as nonconvergence, FALSE to ignore singular fit
+getConvCode <- function (x, verbose=FALSE, checkSingular=TRUE) {
+  library(lme4)
+  library(purrr)
+  
+  ##Get convergence messages
+  convMsg <-
+    x %>% 
+    attr("optinfo") %>% 
+    pluck("conv", "lme4")
+  
+  ##Get singular-fit status
+  if (checkSingular) sgFit <- x %>% isSingular()
+  
+  ##If not verbose, get convergence code as logical
+  if (!verbose) {
+    convCode <- length(convMsg)==0
+    if (checkSingular) convCode <- convCode & !sgFit
+    ##If verbose, get convergence code as character
+  } else {
+    convCode <- character(0L)
+    if (length(convMsg) > 0) {
+      convCode <- convMsg %>% 
+        pluck("messages") %>% 
+        paste(collapse="\n")
+    }
+    
+    if (checkSingular) {
+      if (sgFit) {
+        convCode <- paste(c(convCode, "Singular fit"), collapse="\n")
+      }
+    }
+    
+    ##If nothing has been added to convCode, return the good news.
+    if (length(convCode)==0) {
+      convCode <- "Converged"
+      if (checkSingular) convCode <- paste0(convCode, ", no singular fit")
+    }
+  }
+  
+  convCode
+}
+
+##Convenience function for checking if something is an error
+is.error <- function(x) "error" %in% class(x)
+
+##Get Fox & Monette's (1992) GVIF, which is the square of the "GVIF" reported
+##  by car::vif() and thus is comparable to the 'VIF < 10' criterion.
+##Whereas car::vif() returns either a vector or a matrix, this function always
+##  returns a dataframe
+vif <- function(mod, decreasing=TRUE) {
+  library(car)
+  library(dplyr)
+  
+  vifReturn <- tryCatch(car::vif(mod),
+                        ##Catch and return "fewer than 2 terms" error"
+                        error = function(e) e)
+  
+  if (is.error(vifReturn)) {
+    return(NA)
+  }
+  ##Turn vector VIF into dataframe
+  if (is.numeric(vifReturn) & !is.matrix(vifReturn)) {
+    ret <- data.frame(Term = names(vifReturn),
+                      GVIF = vifReturn,
+                      Df = rep(1, length(vifReturn))) %>% 
+      mutate(`GVIF^(1/(2*Df))` = sqrt(vifReturn),
+             `GVIF^(1/Df)` = vifReturn)
+  }
+  ##Turn matrix VIF into dataframe
+  if (is.numeric(vifReturn) & is.matrix(vifReturn)) {
+    ret <- as.data.frame(vifReturn) %>% 
+      rownames_to_column("Term") %>% 
+      select(Term, everything()) %>% 
+      mutate(`GVIF^(1/Df)` = GVIF ^ (1/Df))
+  }
+  
+  ret
+}
+
+##Get maximum VIF from model
+getMaxVIF <- function(mod, decreasing=TRUE) {
+  library(dplyr)
+  library(purrr)
+  
+  ##If just one term, return NA
+  if (length(labels(terms(mod))) < 2) 
+    return(NA)
+  
+  vif(mod) %>% 
+    ##Get unique max GVIF (in case there are ties)
+    arrange(desc(`GVIF^(1/Df)`)) %>% 
+    slice(1) %>% 
+    pull(`GVIF^(1/Df)`, name=Term)
+}
+```
+
+## Use participant ID as random effect 
+
+```{r Model selection}
+#install.packages("lmerTest")
+library(lmerTest)
+# since there is very little variations in race and enthnicity, so I wont include them. 
+toy1<-lmer(X8wkContr ~ BSContr+Marriage+Age+
+             Formaleducationyears+Employment+(1|ID), Df)
+summary(toy1)
+anova(toy1)
+
+toy2<-lmer(X8wkContr ~ BSContr+Marriage+ Age+ Formaleducationyears+Employment+ symptom +(1|ID), Df)
+summary(toy2)
+
+# we will keep age, formal years of education as covariates. Age is never a significant predictor, but it is an important patient characteristic. 
+toy3<-lmer(X8wkContr ~ BSContr+ Age+ Formaleducationyears+ WC+ symptom +(1|ID), Df)
+toy3.1<-lmer(X8wkContr ~ BSContr+ Age+ Formaleducationyears+Employment+ WC+ symptom +(1|ID), Df)
+summary(toy3)
+anova(toy3, toy3.1)
+summary(toy3)
+
+anova(toy2, toy3)
+
+#toy 4 is significant better than toy3.1 no collinearity issue
+toy4<-lmer(X8wkContr ~ BSContr+ Age+ Formaleducationyears+ WC+ symptom+anx +(1|ID), Df)
+summary(toy4)
+anova(toy3.1, toy4)
+vif(toy4)
+
+#toy 5 is significant better than toy4
+toy5<-lmer(X8wkContr ~ BSContr+ Age+ Formaleducationyears+ WC+ symptom+anx+feel+(1|ID), Df)
+summary(toy5)
+anova(toy5, toy4)
+vif(toy5)
+
+#toy 6 is significant better than toy5, no collinearity issue
+toy6<-lmer(X8wkContr ~ BSContr+ Age+ Formaleducationyears+ WC+ symptom+anx+feel+ focuspresent+(1|ID), Df)
+summary(toy6)
+anova(toy6, toy5)
+vif(toy6)
+
+#toy 7 is significant better than toy6, no collinearity issue
+toy7<-lmer(X8wkContr ~ BSContr+ Age+ Formaleducationyears+ WC+ symptom+anx+feel+ focuspresent+money+(1|ID), Df)
+summary(toy7)
+anova(toy7, toy6)
+vif(toy7)
+
+#toy 8 is marginally significant better than toy7 but with lower AIC, no collinearity issue
+toy8<-lmer(X8wkContr ~ BSContr+ Age+ Formaleducationyears+ WC+ symptom+anx+feel+ focuspresent+money+
+             informal+(1|ID), Df)
+summary(toy8)
+anova(toy8, toy7)
+vif(toy8)
+# nonflu (non-fluency) and informal (informality) are signficantlt positive correlated; toy 8.1 is worse than toy 8
+cor.test(Df$nonflu, Df$informal)
+toy8.1<-lmer(X8wkContr ~ BSContr+ Age+ Formaleducationyears+ WC+ symptom+anx+feel+ focuspresent+money+
+             nonflu+(1|ID), Df)
+summary(toy8.1)
+anova(toy8, toy8.1)
+
+#toy9 is not significantly better than toy 8, but has a bit lower AIC
+toy9<-lmer(X8wkContr ~ BSContr+ Age+ Formaleducationyears+ WC+ symptom+anx+feel+ focuspresent+money+
+             informal+  body+(1|ID), Df)
+summary(toy9)
+anova(toy8, toy9)
+
+#toy10 is not significantly better than toy 9. 
+toy10<-lmer(X8wkContr ~ BSContr+ Age+ Formaleducationyears+ WC+ symptom+anx+feel+ focuspresent+money+
+             informal+ body+ingest+(1|ID), Df)
+summary(toy10)
+anova(toy10, toy9)
+
+#toy11: although age is an important covariate, but it does not explain much variation; after dropping age, AIC is much lower 
+toy11<-lmer(X8wkContr ~ BSContr+ Formaleducationyears+ WC+ symptom+anx+feel+ focuspresent+money+
+             informal+(1|ID), Df)
+summary(toy11)
+anova(toy9, toy11)
+anova(toy8, toy11)
+```
+
+## Diagnostic plots
+
+This residual plot does not indicate any deviations from a linear form. It also shows relatively constant variance across the fitted range. The slight reduction in apparent variance on the right and left of the graph are likely a result of there being fewer observation in these predicted areas.
+```{r  toy 11 diagnostic plots}
+DfNA<-Df %>% na.omit()
+# Linearity of the predictors are assumed
+ggplot(data.frame(x1=DfNA$Formaleducationyears,pearson=residuals(toy11,type="pearson")),
+      aes(x=x1,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Years of formal education")
+
+ggplot(data.frame(x2=DfNA$WC,pearson=residuals(toy11,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Total word count")
+ggplot(data.frame(x2=DfNA$BSContr,pearson=residuals(toy11,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Baseline controllability score")
+
+ggplot(data.frame(x2=DfNA$symptom,pearson=residuals(toy11,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Word category Symptom")
+
+ggplot(data.frame(x2=DfNA$anx,pearson=residuals(toy11,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Word category anxiety")
+
+
+ggplot(data.frame(x2=DfNA$feel,pearson=residuals(toy11,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Word category feel")
+
+ggplot(data.frame(x2=DfNA$focuspresent,pearson=residuals(toy11,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Word category focus present")
+
+ggplot(data.frame(x2=DfNA$money,pearson=residuals(toy11,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Word category money")
+
+ggplot(data.frame(x2=DfNA$informal,pearson=residuals(toy11,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Word category informal")
+# Homogenity is assumed
+plot(toy11) 
+# normality of residuals is assumed
+qqnorm(resid(toy11))
+```
+
+```{r coefficient estimates}
+fixef(toy11)
+confint.merMod(toy11)
+```
+
+### use PCA analysis on the linguistic features
+
+```{r}
+names(Df)
+toyDf<-Df %>% select (13:112)
+head(toyDf)
+#install.packages("factoextra")
+library(factoextra)
+pca<-prcomp(toyDf, scale=TRUE, center = TRUE)
+fviz_eig(pca)
+summary(pca)
+```
+
+### Eigenvalues
+```{r}
+#Eigenvalues
+eig.val<-get_eigenvalue(pca)
+eig.val
+#results for variables
+result.var<-get_pca_var(pca)
+head(result.var$coord)
+head(result.var$contrib)   # Contributions to the PCs
+head(result.var$cos2)    #Quality of representation 
+```
+
+### PCA results for each entries 
+
+I will use 33 components bcz the eigen value >1, explaining 76.8% of the variance  
+```{r}
+ind.coord<-pca$x
+ind.coord1<- as.data.frame(ind.coord[,1:33])
+toyDf1<-cbind(Df, ind.coord1)
+```
+
+### model with ID as random effects and PC1-PC33 as fixed effects (toy12)
+using iterative backward elimination, I chose toy13 due to lower AIC
+
+```{r PC1-PC33 as fixed effects}
+names(toyDf1)
+toy12<-lmer(X8wkContr ~ BSContr+Formaleducationyears+ PC1+PC2+PC3+PC4+PC5+PC6+PC7+PC8+PC9+PC10+PC11+PC12+PC13+PC14+PC15+PC16+PC17+PC18+PC19+
+PC20+PC21+PC22+PC23+PC24+PC25+PC26+PC27+PC28+PC29+PC30+PC31+PC32+PC33+(1|ID), toyDf1)
+summary(toy12)
+
+toy13<-lmer(X8wkContr ~ BSContr+Formaleducationyears+ PC3+PC7+PC13+PC22+PC24+PC26+PC30+PC33+(1|ID), toyDf1)
+summary(toy13)
+anova(toy12, toy13)
+
+toy13.1<-lmer(X8wkContr ~ BSContr+Formaleducationyears+ PC3+PC7+PC13+PC22+PC24+PC30+PC33+(1|ID), toyDf1)
+summary(toy13.1)
+anova(toy13, toy13.1)
+
+toy13.2<-lmer(X8wkContr ~ BSContr+Formaleducationyears+PC7+PC13+PC22+PC24+PC30+PC33+(1|ID), toyDf1)
+summary(toy13.2)
+anova(toy13, toy13.2)
+vif(toy13)
+```
+
+# variable loadings on component 3, 7, 13, 22, 24, 26, 30, 33
+```{r variable loadings}
+# component 3 is immerse writing of symptom ----
+p3<-sort(pca$rotation[,3], decreasing = TRUE) %>% as.data.frame()
+p3<-cbind(wordCategory = rownames(p3), p3)
+rownames(p3) <- 1:nrow(p3)
+names(p3)[2]<-"loadings"
+View(p3)
+ggplot(p3 %>% filter(loadings>0.1))+geom_col(aes(x=wordCategory, y=loadings))+ labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC3:Immersive Writing")
+# component 7 is confidence and motivation -----
+p7<-sort(pca$rotation[,7], decreasing = TRUE) %>% as.data.frame()
+p7<-cbind(wordCategory = rownames(p7), p7)
+rownames(p7) <- 1:nrow(p7)
+names(p7)[2]<-"loadings"
+ggplot(p7 %>% filter(loadings>0.13))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC7:Confidence and motivation")
+
+# component 13 is punctuation. People use more periods usually wrote short sentences and emotionally distant from the topic ------
+p13<-sort(pca$rotation[,13], decreasing = TRUE) %>% as.data.frame()
+p13<-cbind(wordCategory = rownames(p13), p13)
+rownames(p13) <- 1:nrow(p13)
+names(p13)[2]<-"loadings"
+ggplot(p13 %>% filter(loadings>0.13))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC13:Emotionally distant")
+
+# component 22 is venting (confusion and frustration) about symptom ------
+p22<-sort(pca$rotation[,22], decreasing = TRUE) %>% as.data.frame()
+p22<-cbind(wordCategory = rownames(p22), p22)
+rownames(p22) <- 1:nrow(p22)
+names(p22)[2]<-"loadings"
+ggplot(p22 %>% filter(loadings>0.13))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC22:Venting(confusion and frustration)")
+
+# component 24 is about efforts they make to fight against cancer, treatment, symptoms. Participants used greater past tense in discussing a disclosed event and greater present tense in discussing an undis- closed event. Verb tense differences could indicate increased psychological distance and a higher degree of resolution for disclosed events compared with undisclosed events ----
+p24<-sort(pca$rotation[,24], decreasing = TRUE) %>% as.data.frame()
+p24<-cbind(wordCategory = rownames(p24), p24)
+rownames(p24) <- 1:nrow(p24)
+names(p24)[2]<-"loadings"
+ggplot(p24 %>% filter(loadings>0.13))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC24:Effort to fight against cancer")
+
+# component 26 is about pressure from work----
+p26<-sort(pca$rotation[,26], decreasing = TRUE) %>% as.data.frame()
+p26<-cbind(wordCategory = rownames(p26), p26)
+rownames(p26) <- 1:nrow(p26)
+names(p26)[2]<-"loadings"
+ggplot(p26 %>% filter(loadings>0.13))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC26:Pressure and effort to work")
+
+# component 30 is about perceptive process -----
+p30<-sort(pca$rotation[,30], decreasing = TRUE) %>% as.data.frame()
+p30<-cbind(wordCategory = rownames(p30), p30)
+rownames(p30) <- 1:nrow(p30)
+names(p30)[2]<-"loadings"
+ggplot(p30 %>% filter(loadings>0.13))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC30:detailed.symptom.descriptionk")
+
+# component 33 is about financial stress -----
+
+p33<-sort(pca$rotation[,33], decreasing = TRUE) %>% as.data.frame()
+p33<-cbind(wordCategory = rownames(p33), p33)
+rownames(p33) <- 1:nrow(p33)
+names(p33)[2]<-"loadings"
+ggplot(p33 %>% filter(loadings>0.13))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC33:financial.stress")
+
+```
+
+# compare toy 13 and 11 and select toy 13 based on low AIC value
+```{r}
+summary(toy11)
+AIC(toy13, toy11)
+BIC(toy13, toy11)
+```
+
+# Final model
+```{r final model}
+summary(toy13)
+names(toyDf1)[c(115, 119, 125, 134, 136, 138,142, 145)]<-c("immerse.writing.experience", "confidence.and.motivation", "emotionanlly.distant", "venting", "effort.to.fight.cancer", "pressure.and.effort.to.work", "detailed.symptom.description", "financial.stress")
+toy13<-lmer(X8wkContr ~ BSContr+Formaleducationyears+`immerse.writing.experience`+ `confidence.and.motivation`+`emotionanlly.distant`+ `venting` + `effort.to.fight.cancer` +`pressure.and.effort.to.work` +`detailed.symptom.description`+ `financial.stress`+ (1|ID), toyDf1)
+summary(toy13)
+vif(toy13)
+```
+
+
+```{r dev= "png"}
+library(sjPlot)
+sjPlot::plot_model(toy11, show.values=TRUE, show.p=TRUE,
+                   title="Effect of linguistic features on controllability")
+sjPlot::tab_model(toy11)
+sjPlot::plot_model(toy13, show.values=TRUE, show.p=TRUE,
+                   title="Effect of linguistic features on controllability")
+sjPlot::tab_model(toy13)
+```
+
+```{r toy13 diagnostics plot}
+#homogeniety
+plot(toy13)
+#normality assumed
+qqnorm(resid(toy13))
+
+toyDf2 <- na.omit(toyDf1)
+# Linearity of the predictors are assumed
+ggplot(data.frame(x1=toyDf2$immerse.writing.experience,pearson=residuals(toy13,type="pearson")),
+      aes(x=x1,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Symptom experience description")
+
+ggplot(data.frame(x2=toyDf2$confidence.and.motivation,pearson=residuals(toy13,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Confidence and motivation")
+
+ggplot(data.frame(x2=toyDf2$emotionanlly.distant,pearson=residuals(toy13,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Confidence and motivation")
+
+ggplot(data.frame(x2=toyDf2$venting,pearson=residuals(toy13,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Venting")
+
+ggplot(data.frame(x2=toyDf2$emotionanlly.distant,pearson=residuals(toy13,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Emotionally distance")
+
+
+ggplot(data.frame(x2=toyDf2$effort.to.fight.cancer,pearson=residuals(toy13,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Effort to fight against cancer")
+
+ggplot(data.frame(x2=toyDf2$pressure.and.effort.to.work,pearson=residuals(toy13,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Pressure and effort to work")
+
+ggplot(data.frame(x2=toyDf2$detailed.symptom.description,pearson=residuals(toy13,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Detailed symptom description")
+
+ggplot(data.frame(x2=toyDf2$financial.stress,pearson=residuals(toy13,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Financial stress")
+```
+
+## 95% Confidence interval of coefficients
+```{r CI}
+fixef(toy13)
+confint.merMod(toy13)
+# Coeffiencient with 95% CI band
+effects_p3 <- effects::effect(term= "immerse.writing.experience", mod= toy13)
+summary(effects_p3) 
+
+x_p3<-as.data.frame(effects_p3)
+p3_plot <- ggplot() + 
+  geom_point(data=toyDf1, aes(x=immerse.writing.experience, y=X8wkContr))+
+  geom_point(data=x_p3, aes(x=immerse.writing.experience, y=fit ), color="blue") +
+  geom_line(data=x_p3, aes(x= immerse.writing.experience, y=fit), color="blue") +
+  geom_ribbon(data=x_p3, aes(x=immerse.writing.experience, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Immerse writing of traumatic experience", y="controllability")
+p3_plot
+
+effects_p7 <- effects::effect(term= "confidence.and.motivation", mod= toy13)
+summary(effects_p7) 
+x_p7<-as.data.frame(effects_p7)
+p7_plot <- ggplot() + 
+  geom_point(data=toyDf1, aes(x=confidence.and.motivation, y=X8wkContr))+
+  geom_point(data=x_p7, aes(x=confidence.and.motivation, y=fit ), color="blue") +
+  geom_line(data=x_p7, aes(x= confidence.and.motivation, y=fit), color="blue") +
+  geom_ribbon(data=x_p7, aes(x=confidence.and.motivation, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Confidence and motivation", y="controllability")
+p7_plot
+
+effects_p13 <- effects::effect(term= "emotionanlly.distant", mod= toy13)
+summary(effects_p13) 
+x_p13<-as.data.frame(effects_p13)
+p13_plot <- ggplot() + 
+  geom_point(data=toyDf1, aes(x=emotionanlly.distant, y=X8wkContr))+
+  geom_point(data=x_p13, aes(x=emotionanlly.distant, y=fit ), color="blue") +
+  geom_line(data=x_p13, aes(x= emotionanlly.distant, y=fit), color="blue") +
+  geom_ribbon(data=x_p13, aes(x=emotionanlly.distant, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Emotionanlly distant", y="controllability")
+p13_plot
+
+effects_p22 <- effects::effect(term= "venting", mod= toy13)
+summary(effects_p22) 
+x_p22<-as.data.frame(effects_p22)
+p22_plot <- ggplot() + 
+  geom_point(data=toyDf1, aes(x=venting, y=X8wkContr))+
+  geom_point(data=x_p22, aes(x=venting, y=fit ), color="blue") +
+  geom_line(data=x_p22, aes(x= venting, y=fit), color="blue") +
+  geom_ribbon(data=x_p22, aes(x=venting, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Venting", y="controllability")
+p22_plot
+
+effects_p24 <- effects::effect(term= "effort.to.fight.cancer", mod= toy13)
+summary(effects_p24) 
+x_p24<-as.data.frame(effects_p24)
+p24_plot <- ggplot() + 
+  geom_point(data=toyDf1, aes(x=effort.to.fight.cancer, y=X8wkContr))+
+  geom_point(data=x_p24, aes(x=effort.to.fight.cancer, y=fit ), color="blue") +
+  geom_line(data=x_p24, aes(x= effort.to.fight.cancer, y=fit), color="blue") +
+  geom_ribbon(data=x_p24, aes(x=effort.to.fight.cancer, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Effort to fight cancer", y="controllability")
+p24_plot
+
+effects_p26 <- effects::effect(term= "pressure.and.effort.to.work", mod= toy13)
+summary(effects_p26) 
+x_p26<-as.data.frame(effects_p26)
+p26_plot <- ggplot() + 
+  geom_point(data=toyDf1, aes(x=pressure.and.effort.to.work, y=X8wkContr))+
+  geom_point(data=x_p26, aes(x=pressure.and.effort.to.work, y=fit ), color="blue") +
+  geom_line(data=x_p26, aes(x= pressure.and.effort.to.work, y=fit), color="blue") +
+  geom_ribbon(data=x_p26, aes(x=pressure.and.effort.to.work, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Pressure and effort to work", y="controllability")
+p26_plot
+
+effects_p30 <- effects::effect(term= "detailed.symptom.description", mod= toy13)
+summary(effects_p30) 
+x_p30<-as.data.frame(effects_p30)
+p30_plot <- ggplot() + 
+  geom_point(data=toyDf1, aes(x=detailed.symptom.description, y=X8wkContr))+
+  geom_point(data=x_p30, aes(x=detailed.symptom.description, y=fit ), color="blue") +
+  geom_line(data=x_p30, aes(x= detailed.symptom.description, y=fit), color="blue") +
+  geom_ribbon(data=x_p30, aes(x=detailed.symptom.description, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="detailed.symptom.description", y="controllability")
+p30_plot
+
+effects_p33 <- effects::effect(term= "financial.stress", mod= toy13)
+summary(effects_p33) 
+x_p33<-as.data.frame(effects_p33)
+p33_plot <- ggplot() + 
+  geom_point(data=toyDf1, aes(x=financial.stress, y=X8wkContr))+
+  geom_point(data=x_p33, aes(x=financial.stress, y=fit ), color="blue") +
+  geom_line(data=x_p33, aes(x= financial.stress, y=fit), color="blue") +
+  geom_ribbon(data=x_p33, aes(x=financial.stress, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Financial stress", y="controllability")
+p33_plot
+```
+
+# Explanation of the results
+
+After controlled for participant ID, baseline controllability, and participant education, "symptom experience description" is a marginal negative predictor for controllability at 8 weeks. In the immersive writing of a traumatic event, the more authentic and relevant participants write their symptom experience (cancer), the more likely they relive the event and thus might feel worse and loss of control over the related traumatic event (dealing with multiple ans severe symptoms) they are experiencing now. 
+
+After controlled for participant ID, baseline controllability, and participant education, "confidence and motivation" is a significant positive predictor for controllability at 8 weeks. When cancer survivors are confident and motivated fight against cancer, they are more likely to manage the symptoms better. 
+
+After controlled for participant ID, baseline controllability, and participant education,  "emotionanlly distant" is a significant negative predictor for controllability at 8 weeks. In expressive writing, some participants wrote rich narratives of their experience and emotionally invested while others were simply informative and emotionally distant from the topic. When participants were emotionally distant from the event they are dealing with, they are less likely to deal with the issues. 
+
+After controlled for participant ID, baseline controllability, and participant education,  "venting" is a significant positive predictor for controllability at 8 weeks. Studies on expressive writing have shown that venting help patients release negative emotions and maintain healthy mental state to manage their symptoms better
+
+After controlled for participant ID, baseline controllability, and participant education,  "effort to fight cancer" is a significant positive predictor for controllability at 8 weeks. When participants try hard to fight cancer and survive, they are more motivated to manage their symptoms to have a life with better quality. 
+
+After controlled for participant ID, baseline controllability, and participant education, "pressure and effort to work" is a marginally negative predictor for controllability at 8 weeks. When patients talked about their work and job, most of them describe how cancer symptoms affect their employment or work routine and how their job make their symptom worse. On the other hand, some types of works aggravates patients' symptoms, such as pain, fatigue, abdominal bloating. Here is an example "I have to push myself all day to keep up with my job duties. Shortly after I eat lunch, I usually have that 'sugar' drop and want to crawl in a hole and nap." "I have to lay in bed for a few days before going back to work."
+
+After controlled for participant ID, baseline controllability, and participant education,  "detailed symptom description" is a significant positive predictor for controllability at 8 weeks. Reflecting and describing how symptom affects daily life helps patients think about their symptoms in a different way to create condition for behavior change. Patients might be more aware of the limitations of current belief and behavior.The more participants reflect on their symptoms and how they manage it, the more likely they are willing to try new strategies to better manage their symptoms. 
+
+After controlled for participant ID, baseline controllability, and participant education,  "financial stress" is a significant negative predictor for controllability at 8 weeks. Many participants talked about how financial struggling affects their emotional and social participationIt is not surprising that general loss of control influence their perceived sense of control over symptoms, such as depression, anxiety.
+
+
+```{r}
+sessionInfo()
+```
+
+
+
