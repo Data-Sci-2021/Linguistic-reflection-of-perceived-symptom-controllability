@@ -14,12 +14,14 @@ The dependent variable symptom controllability was measured using Symptom repres
 * [Final_report.Rmd](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/final_report.Rmd) This is the editable version of the final report of the project. 
 * [Linguistic analysis of controllability](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/Linguistic-analysis-for-symptom-controllability.md) This is the complete analysis for the project. 
 * [Linguistic analysis of controllability.Rmd](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/Linguistic%20analysis%20for%20symptom%20controllability.Rmd) This is the editable version of the complete analysis for the project. 
-* [Project plan](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/project_plan.md) This is the plan for the project. 
-* [Project plan.Rmd](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/project_plan.Rmd) This is the editable version of the plan for the project.
+* [Project_plan](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/project_plan.md) This is the plan for the project. 
+* [Project_plan.Rmd](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/project_plan.Rmd) This is the editable version of the plan for the project.
+* [Progress_report](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/progress_report.md) This is the the progress report for the project.
+* [Progress_report.Rmd](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/progress_report.Rmd) This is the editable version of the progress report for the project.
 * [LICENSE](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/LICENSE.md) This is the licence for the project. 
 * [Dictionary](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/tree/main/Dictionary) This folder includes self-designed and LIWC2015 word categories. 
 * [images](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/tree/main/images) This folder contains all the figures generated from the complete analysis. 
-* [Progress report](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/tree/main/Progress%20report) This folder contains screenshots of two analyses in-progress and the progress report for the project. 
+* [2 analyses in progress](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/tree/main/2%20analyses%20in%20progress) This folder contains screenshots of two analyses in-progress.  
 
 
 
