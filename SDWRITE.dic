@@ -1,0 +1,123 @@
+%	
+1	symptom
+2	effort
+3	impact
+4	positive adj
+5	negative adj
+6	controlled
+7	uncontrolled
+%	
+abdominal bloating	1
+bloating	1
+pain	1
+fatigue	1
+lack of energy	1
+anxiety	1
+panic	1
+constipation	1
+depression	1
+diarrhea	1
+dizzy	1
+dizziness	1
+drowsy	1
+drowsiness	1
+lose hair	1
+hair loss	1
+headache*	1
+hot flashes	1
+lack of appetite	1
+lymphedema	1
+lymph edema	1
+memory problems	1
+memory issues	1
+memory loss	1
+mood swings	1
+swings	1
+mouth sore	1
+mouth sores	1
+sore*	1
+nausea	1
+nauseated	1
+pain	1
+palmar plantar erythema	1
+blistering	1
+plantar	1
+peripheral neuropathy	1
+neuropathy	1
+sexuality concerns	1
+sexual issues	1
+sexual problems	1
+have sex	1
+having sex	1
+peripheral neuropathy	1
+neuropathy	1
+shortness of breath	1
+out of breath	1
+breath	1
+skin rash	1
+rash	1
+sleep disturbance*	1
+sleep disturbance*	1
+night* sleep	1
+sleep	1
+urinary problem*	1
+urinary infection	1
+urinary tract infection	1
+vomiting	1
+vomit	1
+weight gain	1
+extra weight	1
+weight	1
+symptom	1
+try*	2
+attempt*	2
+apply*	2
+use*	2
+plan*	2
+prevent*	2
+manage*	2
+affect*	3
+effect*	3
+impact*	3
+persist*	3
+steady	4
+manageable	4
+mild	4
+feel* good	4
+get* good	4
+feel* better	4
+get* better	4
+severe	5
+overwhelm*	5
+terrible	5
+sharp	5
+shooting	5
+uncontrollable	5
+frustrating	5
+uncomfortable	5
+constant	5
+sudden	5
+painful	5
+achy	5
+intense	5
+unpleasant	5
+debilitating	5
+numb	5
+bad	5
+worse	5
+worst	5
+under control	6
+more control of	6
+better control	6
+get* control of	6
+in the control of	6
+able to control	6
+gain control of	6
+out of control	7
+no control over	7
+much control over	7
+lose control over	7
+take control of	7
+difficult to control	7
+struggle	7
+suffer	7
