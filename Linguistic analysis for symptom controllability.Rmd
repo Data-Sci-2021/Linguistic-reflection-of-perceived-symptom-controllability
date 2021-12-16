@@ -12,7 +12,7 @@ output:
 
 # Load all datasets
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, comment = NA, fig.path = "images/", dev = "png",dpi = 300,cache = TRUE)
+knitr::opts_chunk$set(echo = TRUE, comment = NA, fig.path = "images/", fig.height=3, fig.width=4.2, fig.show="hold")
                      
 library(readxl)
 library(dplyr)
@@ -131,7 +131,7 @@ Df<- Dftoy %>% na.omit()
 ggplot(Df)+ 
   geom_histogram(binwidth=0.05, color="blue",aes(x= BSContr, y=..density.., fill=..count..))+ 
   stat_function(fun=dnorm,color="blue",
-                args=list(mean=mean(Df$BSContr),sd=sd(Df$BSContr)))
+                args=list(mean=mean(Df$BSContr),sd=sd(Df$BSContr)))+xlab("Baseline controllability score ")
 #QQplots
 qq<-data.frame(c(Df,qqnorm(Df$BSContr)))
 ggplot(qq,aes(x=x,y=y,legend.position="none"))+
@@ -143,7 +143,7 @@ ggplot(qq,aes(x=x,y=y,legend.position="none"))+
 ggplot(Df)+
   geom_boxplot(aes(Df$BSContr))+
   theme_bw()+
-  theme(legend.position="none")
+  theme(legend.position="none")+xlab("Baseline controllability score ")
 shapiro.test(Df$BSContr)
 #install.packages("pastecs")
 library(pastecs)
@@ -158,7 +158,7 @@ Df<- Df %>% na.omit()
 ggplot(Df)+ 
   geom_histogram(binwidth=0.05, color="blue",aes(x= X8wkContr, y=..density.., fill=..count..))+ 
   stat_function(fun=dnorm,color="blue",
-                args=list(mean=mean(Df$BSContr),sd=sd(Df$X8wkContr)))
+                args=list(mean=mean(Df$BSContr),sd=sd(Df$X8wkContr)))+xlab("Controllability score at 8 weeks")
 #QQplots
 qq<-data.frame(c(Df,qqnorm(Df$X8wkContr)))
 ggplot(qq,aes(x=x,y=y,legend.position="none"))+
@@ -170,7 +170,7 @@ ggplot(qq,aes(x=x,y=y,legend.position="none"))+
 ggplot(Df)+
   geom_boxplot(aes(Df$X8wkContr))+
   theme_bw()+
-  theme(legend.position="none")
+  theme(legend.position="none")+xlab("Controllability score at 8 weeks")
 shapiro.test(Df$X8wkContr)
 stat.desc(Df$X8wkContr)
 quantile(Df$X8wkContr, 0.75)-quantile(Df$X8wkContr, 0.25)
@@ -520,7 +520,7 @@ confint.merMod(toy11)
 
 ### use PCA analysis on the linguistic features
 
-```{r}
+```{r screeplot}
 names(Df)
 toyDf<-Df %>% select (13:112)
 head(toyDf)
@@ -638,7 +638,7 @@ ggplot(p33 %>% filter(loadings>0.13))+geom_col(aes(x=wordCategory, y=loadings))+
 
 # compare toy 13 and 11 and select toy 13 based on low AIC value
 ```{r}
-summary(toy11)
+summary(toy13)
 AIC(toy13, toy11)
 BIC(toy13, toy11)
 ```
@@ -650,18 +650,24 @@ names(toyDf1)[c(115, 119, 125, 134, 136, 138,142, 145)]<-c("immerse.writing.expe
 toy13<-lmer(X8wkContr ~ BSContr+Formaleducationyears+`immerse.writing.experience`+ `confidence.and.motivation`+`emotionanlly.distant`+ `venting` + `effort.to.fight.cancer` +`pressure.and.effort.to.work` +`detailed.symptom.description`+ `financial.stress`+ (1|ID), toyDf1)
 summary(toy13)
 vif(toy13)
+vif(toy11)
 ```
 
 
-```{r dev= "png"}
+```{r toy11 model}
 library(sjPlot)
 sjPlot::plot_model(toy11, show.values=TRUE, show.p=TRUE,
                    title="Effect of linguistic features on controllability")
 sjPlot::tab_model(toy11)
+
+```
+
+```{r toy13 model}
 sjPlot::plot_model(toy13, show.values=TRUE, show.p=TRUE,
                    title="Effect of linguistic features on controllability")
 sjPlot::tab_model(toy13)
 ```
+
 
 ```{r toy13 diagnostics plot}
 #homogeniety

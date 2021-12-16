@@ -30,36 +30,32 @@ Yan Wang
         assumed](#baseline-controllability-distribution---normality-assumed)
     -   [6.2 8 week controllability distribution - normality
         violated](#8-week-controllability-distribution---normality-violated)
--   [7 Sample descriptive stats - sample size (157 participants) is
-    bigger than the sample size (112 participants and 314 posts) I use
-    in mixed effect
-    model.](#sample-descriptive-stats---sample-size-157-participants-is-bigger-than-the-sample-size-112-participants-and-314-posts-i-use-in-mixed-effect-model)
--   [8 Preliminary bivariate correlation between the dependent variable
+-   [7 Preliminary bivariate correlation between the dependent variable
     and potential predictors - pearson
     correlation](#preliminary-bivariate-correlation-between-the-dependent-variable-and-potential-predictors---pearson-correlation)
--   [9 Model buiding - Mixed-effect regression
+-   [8 Model buiding - Mixed-effect regression
     model](#model-buiding---mixed-effect-regression-model)
-    -   [9.1 Convenience functions for model
+    -   [8.1 Convenience functions for model
         comparison](#convenience-functions-for-model-comparison)
-    -   [9.2 Use participant ID as random
+    -   [8.2 Use participant ID as random
         effect](#use-participant-id-as-random-effect)
-    -   [9.3 Diagnostic plots](#diagnostic-plots)
-        -   [9.3.1 use PCA analysis on the linguistic
+    -   [8.3 Diagnostic plots](#diagnostic-plots)
+        -   [8.3.1 use PCA analysis on the linguistic
             features](#use-pca-analysis-on-the-linguistic-features)
-        -   [9.3.2 Eigenvalues](#eigenvalues)
-        -   [9.3.3 PCA results for each
+        -   [8.3.2 Eigenvalues](#eigenvalues)
+        -   [8.3.3 PCA results for each
             entries](#pca-results-for-each-entries)
-        -   [9.3.4 model with ID as random effects and PC1-PC33 as fixed
+        -   [8.3.4 model with ID as random effects and PC1-PC33 as fixed
             effects
             (toy12)](#model-with-id-as-random-effects-and-pc1-pc33-as-fixed-effects-toy12)
--   [10 variable loadings on component 3, 7, 13, 22, 24, 26, 30,
+-   [9 variable loadings on component 3, 7, 13, 22, 24, 26, 30,
     33](#variable-loadings-on-component-3-7-13-22-24-26-30-33)
--   [11 compare toy 13 and 11 and select toy 13 based on low AIC
+-   [10 compare toy 13 and 11 and select toy 13 based on low AIC
     value](#compare-toy-13-and-11-and-select-toy-13-based-on-low-aic-value)
--   [12 Final model](#final-model)
-    -   [12.1 95% Confidence interval of
+-   [11 Final model](#final-model)
+    -   [11.1 95% Confidence interval of
         coefficients](#95-confidence-interval-of-coefficients)
--   [13 Explanation of the results](#explanation-of-the-results)
+-   [12 Explanation of the results](#explanation-of-the-results)
 
 **This script is a new replacement**
 
@@ -285,19 +281,9 @@ Df<- Dftoy %>% na.omit()
 ggplot(Df)+ 
   geom_histogram(binwidth=0.05, color="blue",aes(x= BSContr, y=..density.., fill=..count..))+ 
   stat_function(fun=dnorm,color="blue",
-                args=list(mean=mean(Df$BSContr),sd=sd(Df$BSContr)))
-```
-
-![](images/Baseline%20controllability-1.png)<!-- -->
-
-``` r
+                args=list(mean=mean(Df$BSContr),sd=sd(Df$BSContr)))+xlab("Baseline controllability score ")
 #QQplots
 qq<-data.frame(c(Df,qqnorm(Df$BSContr)))
-```
-
-![](images/Baseline%20controllability-2.png)<!-- -->
-
-``` r
 ggplot(qq,aes(x=x,y=y,legend.position="none"))+
   geom_point()+
   geom_smooth(method="lm")+
@@ -307,19 +293,12 @@ ggplot(qq,aes(x=x,y=y,legend.position="none"))+
 
     `geom_smooth()` using formula 'y ~ x'
 
-![](images/Baseline%20controllability-3.png)<!-- -->
-
 ``` r
 ##boxplots
 ggplot(Df)+
   geom_boxplot(aes(Df$BSContr))+
   theme_bw()+
-  theme(legend.position="none")
-```
-
-![](images/Baseline%20controllability-4.png)<!-- -->
-
-``` r
+  theme(legend.position="none")+xlab("Baseline controllability score ")
 shapiro.test(Df$BSContr)
 ```
 
@@ -369,6 +348,8 @@ table(Df$BSContr)
     3.8   4 
       4   2 
 
+![](images/Baseline%20controllability-1.png)![](images/Baseline%20controllability-2.png)![](images/Baseline%20controllability-3.png)![](images/Baseline%20controllability-4.png)
+
 ## 6.2 8 week controllability distribution - normality violated
 
 ``` r
@@ -376,19 +357,9 @@ Df<- Df %>% na.omit()
 ggplot(Df)+ 
   geom_histogram(binwidth=0.05, color="blue",aes(x= X8wkContr, y=..density.., fill=..count..))+ 
   stat_function(fun=dnorm,color="blue",
-                args=list(mean=mean(Df$BSContr),sd=sd(Df$X8wkContr)))
-```
-
-![](images/8%20week%20controllability-1.png)<!-- -->
-
-``` r
+                args=list(mean=mean(Df$BSContr),sd=sd(Df$X8wkContr)))+xlab("Controllability score at 8 weeks")
 #QQplots
 qq<-data.frame(c(Df,qqnorm(Df$X8wkContr)))
-```
-
-![](images/8%20week%20controllability-2.png)<!-- -->
-
-``` r
 ggplot(qq,aes(x=x,y=y,legend.position="none"))+
   geom_point()+
   geom_smooth(method="lm")+
@@ -398,19 +369,12 @@ ggplot(qq,aes(x=x,y=y,legend.position="none"))+
 
     `geom_smooth()` using formula 'y ~ x'
 
-![](images/8%20week%20controllability-3.png)<!-- -->
-
 ``` r
 ##boxplots
 ggplot(Df)+
   geom_boxplot(aes(Df$X8wkContr))+
   theme_bw()+
-  theme(legend.position="none")
-```
-
-![](images/8%20week%20controllability-4.png)<!-- -->
-
-``` r
+  theme(legend.position="none")+xlab("Controllability score at 8 weeks")
 shapiro.test(Df$X8wkContr)
 ```
 
@@ -446,9 +410,10 @@ table(Df$X8wkContr)
       0 0.4 0.6 0.8   1 1.2 1.4 1.6 1.8   2 2.2 2.4 2.6 2.8   3 3.2 3.4 3.6 3.8   4 
       2   2   2   1   3   2   9  19  16  40  26  26  28  22  51  28   6   8   2   7 
 
-# 7 Sample descriptive stats - sample size (157 participants) is bigger than the sample size (112 participants and 314 posts) I use in mixed effect model.
-
-Participants are predominantly married or Living with
+![](images/8%20week%20controllability-1.png)![](images/8%20week%20controllability-2.png)![](images/8%20week%20controllability-3.png)![](images/8%20week%20controllability-4.png)
+\# Sample descriptive stats - sample size (157 participants) is bigger
+than the sample size (112 participants and 314 posts) I use in mixed
+effect model. Participants are predominantly married or Living with
 partner/significant other(75.16%), white (93%), non-hispanic (96.18%),
 unemployed (59.24%). The mean of age is 58.18 (SD = 9.72). The average
 of formal years of education is 14.4 (SD=2.72)
@@ -531,18 +496,8 @@ ggplot(Metadata)+
   geom_histogram(binwidth=0.1, color="blue",aes(x=Age, y=..density.., fill=..count..))+ 
   stat_function(fun=dnorm,color="blue",
                 args=list(mean=mean(Metadata$Age),sd=sd(Metadata$Age)))
-```
-
-![](images/sociodemographic-1.png)<!-- -->
-
-``` r
 #QQplots
 qq<-data.frame(c(Metadata,qqnorm(Metadata$Age)))
-```
-
-![](images/sociodemographic-2.png)<!-- -->
-
-``` r
 ggplot(qq,aes(x=x,y=y,legend.position="none"))+
   geom_point()+
   geom_smooth(method="lm")+
@@ -551,8 +506,6 @@ ggplot(qq,aes(x=x,y=y,legend.position="none"))+
 ```
 
     `geom_smooth()` using formula 'y ~ x'
-
-![](images/sociodemographic-3.png)<!-- -->
 
 ``` r
 ##boxplots
@@ -563,8 +516,6 @@ ggplot(Metadata)+
 ```
 
     Warning: Use of `Metadata$Age` is discouraged. Use `Age` instead.
-
-![](images/sociodemographic-4.png)<!-- -->
 
 ``` r
 shapiro.test(Metadata$Age)
@@ -600,18 +551,8 @@ ggplot(Metadata)+
   geom_histogram(binwidth=0.5, color="blue",aes(x=Formaleducationyears, y=..density.., fill=..count..))+ 
   stat_function(fun=dnorm,color="blue",
                 args=list(mean=mean(Metadata$Formaleducationyears),sd=sd(Metadata$Formaleducationyears)))
-```
-
-![](images/sociodemographic-5.png)<!-- -->
-
-``` r
 #QQplots
 qq<-data.frame(c(Metadata,qqnorm(Metadata$Formaleducationyears)))
-```
-
-![](images/sociodemographic-6.png)<!-- -->
-
-``` r
 ggplot(qq,aes(x=x,y=y,legend.position="none"))+
   geom_point()+
   geom_smooth(method="lm")+
@@ -620,8 +561,6 @@ ggplot(qq,aes(x=x,y=y,legend.position="none"))+
 ```
 
     `geom_smooth()` using formula 'y ~ x'
-
-![](images/sociodemographic-7.png)<!-- -->
 
 ``` r
 ##boxplots
@@ -634,8 +573,6 @@ ggplot(Metadata)+
     Warning: Use of `Metadata$Formaleducationyears` is discouraged. Use
     `Formaleducationyears` instead.
 
-![](images/sociodemographic-8.png)<!-- -->
-
 ``` r
 shapiro.test(Metadata$Formaleducationyears)
 ```
@@ -646,7 +583,9 @@ shapiro.test(Metadata$Formaleducationyears)
     data:  Metadata$Formaleducationyears
     W = 0.87253, p-value = 2.529e-10
 
-# 8 Preliminary bivariate correlation between the dependent variable and potential predictors - pearson correlation
+![](images/sociodemographic-1.png)![](images/sociodemographic-2.png)![](images/sociodemographic-3.png)![](images/sociodemographic-4.png)![](images/sociodemographic-5.png)![](images/sociodemographic-6.png)![](images/sociodemographic-7.png)![](images/sociodemographic-8.png)
+
+# 7 Preliminary bivariate correlation between the dependent variable and potential predictors - pearson correlation
 
 ``` r
 names(Dftoy)
@@ -1076,15 +1015,12 @@ cor.test(Df$X8wkContr, Df$prep)
 corrgram(Df %>% select (X8wkContr,BSContr, WC, symptom, controlled, controlNN,anx,feel, body, ingest, focuspresent, money, informal, nonflu, negate, discrep, certain, Analytic, Sixltr, prep), order=FALSE, lower.panel=panel.shade,
   upper.panel=panel.pie, text.panel=panel.txt,
   main="IVs and DV correlation")
+## As we can see posemo and tone are highly correlated, symptom and health category are highly correlated as well. 
 ```
 
 ![](images/Bivariate%20correlation-1.png)<!-- -->
 
-``` r
-## As we can see posemo and tone are highly correlated, symptom and health category are highly correlated as well. 
-```
-
-# 9 Model buiding - Mixed-effect regression model
+# 8 Model buiding - Mixed-effect regression model
 
 Based on theories and bivariate correlation test results , I have some
 ideas of candidate predictors. Since this analysis is exploratory in
@@ -1096,7 +1032,7 @@ and symptom selected, e.g., marriage status, age, education, employment,
 race, ethnicity because patients were predominantly non-Hispanic white)
 Full purpose-oriented predictor selection
 
-## 9.1 Convenience functions for model comparison
+## 8.1 Convenience functions for model comparison
 
 ``` r
 ##Get convergence code for a single model
@@ -1198,7 +1134,7 @@ getMaxVIF <- function(mod, decreasing=TRUE) {
 }
 ```
 
-## 9.2 Use participant ID as random effect
+## 8.2 Use participant ID as random effect
 
 ``` r
 #install.packages("lmerTest")
@@ -2284,7 +2220,7 @@ anova(toy8, toy11)
     toy11   12 488.41 532.85 -232.21   464.41                     
     toy8    13 490.40 538.55 -232.20   464.40 0.0103  1     0.9192
 
-## 9.3 Diagnostic plots
+## 8.3 Diagnostic plots
 
 This residual plot does not indicate any deviations from a linear form.
 It also shows relatively constant variance across the fitted range. The
@@ -2299,95 +2235,53 @@ ggplot(data.frame(x1=DfNA$Formaleducationyears,pearson=residuals(toy11,type="pea
       aes(x=x1,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Years of formal education")
-```
 
-![](images/toy%2011%20diagnostic%20plots-1.png)<!-- -->
-
-``` r
 ggplot(data.frame(x2=DfNA$WC,pearson=residuals(toy11,type="pearson")),
       aes(x=x2,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Total word count")
-```
-
-![](images/toy%2011%20diagnostic%20plots-2.png)<!-- -->
-
-``` r
 ggplot(data.frame(x2=DfNA$BSContr,pearson=residuals(toy11,type="pearson")),
       aes(x=x2,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Baseline controllability score")
-```
 
-![](images/toy%2011%20diagnostic%20plots-3.png)<!-- -->
-
-``` r
 ggplot(data.frame(x2=DfNA$symptom,pearson=residuals(toy11,type="pearson")),
       aes(x=x2,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Word category Symptom")
-```
 
-![](images/toy%2011%20diagnostic%20plots-4.png)<!-- -->
-
-``` r
 ggplot(data.frame(x2=DfNA$anx,pearson=residuals(toy11,type="pearson")),
       aes(x=x2,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Word category anxiety")
-```
 
-![](images/toy%2011%20diagnostic%20plots-5.png)<!-- -->
 
-``` r
 ggplot(data.frame(x2=DfNA$feel,pearson=residuals(toy11,type="pearson")),
       aes(x=x2,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Word category feel")
-```
 
-![](images/toy%2011%20diagnostic%20plots-6.png)<!-- -->
-
-``` r
 ggplot(data.frame(x2=DfNA$focuspresent,pearson=residuals(toy11,type="pearson")),
       aes(x=x2,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Word category focus present")
-```
 
-![](images/toy%2011%20diagnostic%20plots-7.png)<!-- -->
-
-``` r
 ggplot(data.frame(x2=DfNA$money,pearson=residuals(toy11,type="pearson")),
       aes(x=x2,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Word category money")
-```
 
-![](images/toy%2011%20diagnostic%20plots-8.png)<!-- -->
-
-``` r
 ggplot(data.frame(x2=DfNA$informal,pearson=residuals(toy11,type="pearson")),
       aes(x=x2,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Word category informal")
-```
-
-![](images/toy%2011%20diagnostic%20plots-9.png)<!-- -->
-
-``` r
 # Homogenity is assumed
 plot(toy11) 
-```
-
-![](images/toy%2011%20diagnostic%20plots-10.png)<!-- -->
-
-``` r
 # normality of residuals is assumed
 qqnorm(resid(toy11))
 ```
 
-![](images/toy%2011%20diagnostic%20plots-11.png)<!-- -->
+![](images/toy%2011%20diagnostic%20plots-1.png)![](images/toy%2011%20diagnostic%20plots-2.png)![](images/toy%2011%20diagnostic%20plots-3.png)![](images/toy%2011%20diagnostic%20plots-4.png)![](images/toy%2011%20diagnostic%20plots-5.png)![](images/toy%2011%20diagnostic%20plots-6.png)![](images/toy%2011%20diagnostic%20plots-7.png)![](images/toy%2011%20diagnostic%20plots-8.png)![](images/toy%2011%20diagnostic%20plots-9.png)![](images/toy%2011%20diagnostic%20plots-10.png)![](images/toy%2011%20diagnostic%20plots-11.png)
 
 ``` r
 fixef(toy11)
@@ -2422,7 +2316,7 @@ confint.merMod(toy11)
     money                -3.669866e-01  0.0025398478
     informal             -3.914554e-03  0.2326161226
 
-### 9.3.1 use PCA analysis on the linguistic features
+### 8.3.1 use PCA analysis on the linguistic features
 
 ``` r
 names(Df)
@@ -2553,11 +2447,6 @@ library(factoextra)
 ``` r
 pca<-prcomp(toyDf, scale=TRUE, center = TRUE)
 fviz_eig(pca)
-```
-
-![](images/unnamed-chunk-7-1.png)<!-- -->
-
-``` r
 summary(pca)
 ```
 
@@ -2623,7 +2512,9 @@ summary(pca)
     Proportion of Variance 0.00000 0.0000000
     Cumulative Proportion  1.00000 1.0000000
 
-### 9.3.2 Eigenvalues
+![](images/screeplot-1.png)<!-- -->
+
+### 8.3.2 Eigenvalues
 
 ``` r
 #Eigenvalues
@@ -3170,7 +3061,7 @@ head(result.var$cos2)    #Quality of representation
     negative.adj 7.923538e-07 2.433806e-07 4.165642e-11 1.342067e-15 5.589726e-16
     controlled   5.833726e-07 3.686388e-08 2.834173e-10 1.412919e-14 3.997809e-15
 
-### 9.3.3 PCA results for each entries
+### 8.3.3 PCA results for each entries
 
 I will use 33 components bcz the eigen value &gt;1, explaining 76.8% of
 the variance
@@ -3181,7 +3072,7 @@ ind.coord1<- as.data.frame(ind.coord[,1:33])
 toyDf1<-cbind(Df, ind.coord1)
 ```
 
-### 9.3.4 model with ID as random effects and PC1-PC33 as fixed effects (toy12)
+### 8.3.4 model with ID as random effects and PC1-PC33 as fixed effects (toy12)
 
 using iterative backward elimination, I chose toy13 due to lower AIC
 
@@ -3544,7 +3435,7 @@ vif(toy13)
     PC30                    1.014454
     PC33                    1.006390
 
-# 10 variable loadings on component 3, 7, 13, 22, 24, 26, 30, 33
+# 9 variable loadings on component 3, 7, 13, 22, 24, 26, 30, 33
 
 ``` r
 # component 3 is immerse writing of symptom ----
@@ -3554,77 +3445,48 @@ rownames(p3) <- 1:nrow(p3)
 names(p3)[2]<-"loadings"
 View(p3)
 ggplot(p3 %>% filter(loadings>0.1))+geom_col(aes(x=wordCategory, y=loadings))+ labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC3:Immersive Writing")
-```
-
-![](images/variable%20loadings-1.png)<!-- -->
-
-``` r
 # component 7 is confidence and motivation -----
 p7<-sort(pca$rotation[,7], decreasing = TRUE) %>% as.data.frame()
 p7<-cbind(wordCategory = rownames(p7), p7)
 rownames(p7) <- 1:nrow(p7)
 names(p7)[2]<-"loadings"
 ggplot(p7 %>% filter(loadings>0.13))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC7:Confidence and motivation")
-```
 
-![](images/variable%20loadings-2.png)<!-- -->
-
-``` r
 # component 13 is punctuation. People use more periods usually wrote short sentences and emotionally distant from the topic ------
 p13<-sort(pca$rotation[,13], decreasing = TRUE) %>% as.data.frame()
 p13<-cbind(wordCategory = rownames(p13), p13)
 rownames(p13) <- 1:nrow(p13)
 names(p13)[2]<-"loadings"
 ggplot(p13 %>% filter(loadings>0.13))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC13:Emotionally distant")
-```
 
-![](images/variable%20loadings-3.png)<!-- -->
-
-``` r
 # component 22 is venting (confusion and frustration) about symptom ------
 p22<-sort(pca$rotation[,22], decreasing = TRUE) %>% as.data.frame()
 p22<-cbind(wordCategory = rownames(p22), p22)
 rownames(p22) <- 1:nrow(p22)
 names(p22)[2]<-"loadings"
 ggplot(p22 %>% filter(loadings>0.13))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC22:Venting(confusion and frustration)")
-```
 
-![](images/variable%20loadings-4.png)<!-- -->
-
-``` r
 # component 24 is about efforts they make to fight against cancer, treatment, symptoms. Participants used greater past tense in discussing a disclosed event and greater present tense in discussing an undis- closed event. Verb tense differences could indicate increased psychological distance and a higher degree of resolution for disclosed events compared with undisclosed events ----
 p24<-sort(pca$rotation[,24], decreasing = TRUE) %>% as.data.frame()
 p24<-cbind(wordCategory = rownames(p24), p24)
 rownames(p24) <- 1:nrow(p24)
 names(p24)[2]<-"loadings"
 ggplot(p24 %>% filter(loadings>0.13))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC24:Effort to fight against cancer")
-```
 
-![](images/variable%20loadings-5.png)<!-- -->
-
-``` r
 # component 26 is about pressure from work----
 p26<-sort(pca$rotation[,26], decreasing = TRUE) %>% as.data.frame()
 p26<-cbind(wordCategory = rownames(p26), p26)
 rownames(p26) <- 1:nrow(p26)
 names(p26)[2]<-"loadings"
 ggplot(p26 %>% filter(loadings>0.13))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC26:Pressure and effort to work")
-```
 
-![](images/variable%20loadings-6.png)<!-- -->
-
-``` r
 # component 30 is about perceptive process -----
 p30<-sort(pca$rotation[,30], decreasing = TRUE) %>% as.data.frame()
 p30<-cbind(wordCategory = rownames(p30), p30)
 rownames(p30) <- 1:nrow(p30)
 names(p30)[2]<-"loadings"
 ggplot(p30 %>% filter(loadings>0.13))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC30:detailed.symptom.descriptionk")
-```
 
-![](images/variable%20loadings-7.png)<!-- -->
-
-``` r
 # component 33 is about financial stress -----
 
 p33<-sort(pca$rotation[,33], decreasing = TRUE) %>% as.data.frame()
@@ -3634,58 +3496,71 @@ names(p33)[2]<-"loadings"
 ggplot(p33 %>% filter(loadings>0.13))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC33:financial.stress")
 ```
 
-![](images/variable%20loadings-8.png)<!-- -->
+![](images/variable%20loadings-1.png)![](images/variable%20loadings-2.png)![](images/variable%20loadings-3.png)![](images/variable%20loadings-4.png)![](images/variable%20loadings-5.png)![](images/variable%20loadings-6.png)![](images/variable%20loadings-7.png)![](images/variable%20loadings-8.png)
 
-# 11 compare toy 13 and 11 and select toy 13 based on low AIC value
+# 10 compare toy 13 and 11 and select toy 13 based on low AIC value
 
 ``` r
-summary(toy11)
+summary(toy13)
 ```
 
     Linear mixed model fit by REML. t-tests use Satterthwaite's method [
     lmerModLmerTest]
-    Formula: X8wkContr ~ BSContr + Formaleducationyears + WC + symptom + anx +  
-        feel + focuspresent + money + informal + (1 | ID)
-       Data: Df
+    Formula: X8wkContr ~ BSContr + Formaleducationyears + PC3 + PC7 + PC13 +  
+        PC22 + PC24 + PC26 + PC30 + PC33 + (1 | ID)
+       Data: toyDf1
 
-    REML criterion at convergence: 527.2
+    REML criterion at convergence: 514.2
 
     Scaled residuals: 
          Min       1Q   Median       3Q      Max 
-    -2.72123 -0.48823 -0.00718  0.52831  2.92969 
+    -2.55135 -0.48626 -0.00489  0.50587  2.69724 
 
     Random effects:
      Groups   Name        Variance Std.Dev.
-     ID       (Intercept) 0.1723   0.4151  
-     Residual             0.1774   0.4212  
+     ID       (Intercept) 0.2148   0.4634  
+     Residual             0.1546   0.3931  
     Number of obs: 300, groups:  ID, 114
 
     Fixed effects:
-                           Estimate Std. Error         df t value Pr(>|t|)    
-    (Intercept)           1.313e+00  3.149e-01  1.926e+02   4.169 4.62e-05 ***
-    BSContr               3.642e-01  4.470e-02  2.789e+02   8.147 1.26e-14 ***
-    Formaleducationyears  2.934e-02  1.678e-02  1.088e+02   1.748  0.08322 .  
-    WC                    4.199e-04  1.724e-04  2.892e+02   2.436  0.01545 *  
-    symptom               6.103e-02  1.879e-02  2.384e+02   3.248  0.00133 ** 
-    anx                   5.555e-02  3.106e-02  2.201e+02   1.788  0.07511 .  
-    feel                 -3.761e-02  1.561e-02  2.398e+02  -2.409  0.01675 *  
-    focuspresent         -1.849e-02  9.377e-03  2.627e+02  -1.972  0.04968 *  
-    money                -1.819e-01  9.525e-02  2.524e+02  -1.909  0.05737 .  
-    informal              1.139e-01  6.085e-02  2.288e+02   1.872  0.06244 .  
+                          Estimate Std. Error        df t value Pr(>|t|)    
+    (Intercept)            1.09827    0.27862 125.43539   3.942 0.000134 ***
+    BSContr                0.35347    0.04466 274.05592   7.914  6.2e-14 ***
+    Formaleducationyears   0.03984    0.01784 109.01921   2.234 0.027540 *  
+    PC3                   -0.02095    0.01255 240.95340  -1.670 0.096285 .  
+    PC7                    0.04615    0.01681 258.02543   2.745 0.006481 ** 
+    PC13                  -0.04653    0.02053 258.79106  -2.266 0.024283 *  
+    PC22                   0.08141    0.02232 218.71358   3.647 0.000332 ***
+    PC24                   0.07200    0.02311 217.49177   3.115 0.002086 ** 
+    PC26                  -0.04140    0.02575 247.57830  -1.608 0.109115    
+    PC30                   0.07900    0.02662 236.15700   2.968 0.003302 ** 
+    PC33                  -0.06117    0.02626 217.72126  -2.329 0.020761 *  
     ---
     Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
     Correlation of Fixed Effects:
-                (Intr) BSCntr Frmldc WC     symptm anx    feel   fcsprs money 
-    BSContr     -0.273                                                        
-    Frmldctnyrs -0.772 -0.055                                                 
-    WC          -0.178 -0.071 -0.051                                          
-    symptom     -0.093 -0.027 -0.096  0.145                                   
-    anx         -0.016 -0.137 -0.014  0.056  0.002                            
-    feel        -0.124  0.018  0.042  0.048 -0.190  0.068                     
-    focuspresnt -0.539  0.043  0.065  0.158  0.126  0.002 -0.012              
-    money        0.038 -0.027 -0.069 -0.140  0.112  0.077  0.029 -0.065       
-    informal    -0.059 -0.024 -0.002  0.014  0.101 -0.114 -0.058  0.023  0.042
+                (Intr) BSCntr Frmldc PC3    PC7    PC13   PC22   PC24   PC26  
+    BSContr     -0.307                                                        
+    Frmldctnyrs -0.915 -0.059                                                 
+    PC3         -0.020 -0.081  0.052                                          
+    PC7         -0.113  0.071  0.094  0.050                                   
+    PC13        -0.075  0.233 -0.013 -0.032 -0.018                            
+    PC22         0.040  0.001 -0.042 -0.104 -0.036 -0.019                     
+    PC24         0.003 -0.108  0.040  0.024  0.028 -0.020  0.000              
+    PC26        -0.082  0.127  0.035 -0.007  0.020  0.069 -0.015 -0.100       
+    PC30         0.064 -0.078 -0.036 -0.043  0.001 -0.029 -0.003  0.016 -0.073
+    PC33         0.013 -0.038  0.003  0.020  0.005 -0.037  0.001 -0.008 -0.064
+                PC30  
+    BSContr           
+    Frmldctnyrs       
+    PC3               
+    PC7               
+    PC13              
+    PC22              
+    PC24              
+    PC26              
+    PC30              
+    PC33         0.005
 
 ``` r
 AIC(toy13, toy11)
@@ -3703,7 +3578,7 @@ BIC(toy13, toy11)
     toy13 13 588.3522
     toy11 12 595.6073
 
-# 12 Final model
+# 11 Final model
 
 ``` r
 summary(toy13)
@@ -3874,19 +3749,34 @@ vif(toy13)
     financial.stress                    1.003190    1.006390
 
 ``` r
-library(sjPlot)
+vif(toy11)
 ```
 
-    Install package "strengejacke" from GitHub (`devtools::install_github("strengejacke/strengejacke")`) to load all sj-packages at once!
+                                         Term     GVIF Df GVIF^(1/(2*Df))
+    BSContr                           BSContr 1.034703  1        1.017204
+    Formaleducationyears Formaleducationyears 1.027945  1        1.013876
+    WC                                     WC 1.089354  1        1.043721
+    symptom                           symptom 1.115491  1        1.056168
+    anx                                   anx 1.048245  1        1.023838
+    feel                                 feel 1.055237  1        1.027248
+    focuspresent                 focuspresent 1.051768  1        1.025557
+    money                               money 1.061247  1        1.030169
+    informal                         informal 1.028593  1        1.014196
+                         GVIF^(1/Df)
+    BSContr                 1.034703
+    Formaleducationyears    1.027945
+    WC                      1.089354
+    symptom                 1.115491
+    anx                     1.048245
+    feel                    1.055237
+    focuspresent            1.051768
+    money                   1.061247
+    informal                1.028593
 
 ``` r
+library(sjPlot)
 sjPlot::plot_model(toy11, show.values=TRUE, show.p=TRUE,
                    title="Effect of linguistic features on controllability")
-```
-
-![](images/unnamed-chunk-11-1.png)<!-- -->
-
-``` r
 sjPlot::tab_model(toy11)
 ```
 
@@ -4105,14 +3995,11 @@ Marginal R<sup>2</sup> / Conditional R<sup>2</sup>
 </tr>
 </table>
 
+![](images/toy11%20model-1.png)<!-- -->
+
 ``` r
 sjPlot::plot_model(toy13, show.values=TRUE, show.p=TRUE,
                    title="Effect of linguistic features on controllability")
-```
-
-![](images/unnamed-chunk-11-2.png)<!-- -->
-
-``` r
 sjPlot::tab_model(toy13)
 ```
 
@@ -4345,104 +4232,66 @@ Marginal R<sup>2</sup> / Conditional R<sup>2</sup>
 </tr>
 </table>
 
+![](images/toy13%20model-1.png)<!-- -->
+
 ``` r
 #homogeniety
 plot(toy13)
-```
-
-![](images/toy13%20diagnostics%20plot-1.png)<!-- -->
-
-``` r
 #normality assumed
 qqnorm(resid(toy13))
-```
 
-![](images/toy13%20diagnostics%20plot-2.png)<!-- -->
-
-``` r
 toyDf2 <- na.omit(toyDf1)
 # Linearity of the predictors are assumed
 ggplot(data.frame(x1=toyDf2$immerse.writing.experience,pearson=residuals(toy13,type="pearson")),
       aes(x=x1,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Symptom experience description")
-```
 
-![](images/toy13%20diagnostics%20plot-3.png)<!-- -->
-
-``` r
 ggplot(data.frame(x2=toyDf2$confidence.and.motivation,pearson=residuals(toy13,type="pearson")),
       aes(x=x2,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Confidence and motivation")
-```
 
-![](images/toy13%20diagnostics%20plot-4.png)<!-- -->
-
-``` r
 ggplot(data.frame(x2=toyDf2$emotionanlly.distant,pearson=residuals(toy13,type="pearson")),
       aes(x=x2,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Confidence and motivation")
-```
 
-![](images/toy13%20diagnostics%20plot-5.png)<!-- -->
-
-``` r
 ggplot(data.frame(x2=toyDf2$venting,pearson=residuals(toy13,type="pearson")),
       aes(x=x2,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Venting")
-```
 
-![](images/toy13%20diagnostics%20plot-6.png)<!-- -->
-
-``` r
 ggplot(data.frame(x2=toyDf2$emotionanlly.distant,pearson=residuals(toy13,type="pearson")),
       aes(x=x2,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Emotionally distance")
-```
 
-![](images/toy13%20diagnostics%20plot-7.png)<!-- -->
 
-``` r
 ggplot(data.frame(x2=toyDf2$effort.to.fight.cancer,pearson=residuals(toy13,type="pearson")),
       aes(x=x2,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Effort to fight against cancer")
-```
 
-![](images/toy13%20diagnostics%20plot-8.png)<!-- -->
-
-``` r
 ggplot(data.frame(x2=toyDf2$pressure.and.effort.to.work,pearson=residuals(toy13,type="pearson")),
       aes(x=x2,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Pressure and effort to work")
-```
 
-![](images/toy13%20diagnostics%20plot-9.png)<!-- -->
-
-``` r
 ggplot(data.frame(x2=toyDf2$detailed.symptom.description,pearson=residuals(toy13,type="pearson")),
       aes(x=x2,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Detailed symptom description")
-```
 
-![](images/toy13%20diagnostics%20plot-10.png)<!-- -->
-
-``` r
 ggplot(data.frame(x2=toyDf2$financial.stress,pearson=residuals(toy13,type="pearson")),
       aes(x=x2,y=pearson)) +
     geom_point() +
     theme_bw()+xlab("Financial stress")
 ```
 
-![](images/toy13%20diagnostics%20plot-11.png)<!-- -->
+![](images/toy13%20diagnostics%20plot-1.png)![](images/toy13%20diagnostics%20plot-2.png)![](images/toy13%20diagnostics%20plot-3.png)![](images/toy13%20diagnostics%20plot-4.png)![](images/toy13%20diagnostics%20plot-5.png)![](images/toy13%20diagnostics%20plot-6.png)![](images/toy13%20diagnostics%20plot-7.png)![](images/toy13%20diagnostics%20plot-8.png)![](images/toy13%20diagnostics%20plot-9.png)![](images/toy13%20diagnostics%20plot-10.png)![](images/toy13%20diagnostics%20plot-11.png)
 
-## 12.1 95% Confidence interval of coefficients
+## 11.1 95% Confidence interval of coefficients
 
 ``` r
 fixef(toy13)
@@ -4512,11 +4361,7 @@ p3_plot <- ggplot() +
   geom_line(data=x_p3, aes(x= immerse.writing.experience, y=fit), color="blue") +
   geom_ribbon(data=x_p3, aes(x=immerse.writing.experience, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Immerse writing of traumatic experience", y="controllability")
 p3_plot
-```
 
-![](images/CI-1.png)<!-- -->
-
-``` r
 effects_p7 <- effects::effect(term= "confidence.and.motivation", mod= toy13)
 summary(effects_p7) 
 ```
@@ -4545,11 +4390,7 @@ p7_plot <- ggplot() +
   geom_line(data=x_p7, aes(x= confidence.and.motivation, y=fit), color="blue") +
   geom_ribbon(data=x_p7, aes(x=confidence.and.motivation, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Confidence and motivation", y="controllability")
 p7_plot
-```
 
-![](images/CI-2.png)<!-- -->
-
-``` r
 effects_p13 <- effects::effect(term= "emotionanlly.distant", mod= toy13)
 summary(effects_p13) 
 ```
@@ -4578,11 +4419,7 @@ p13_plot <- ggplot() +
   geom_line(data=x_p13, aes(x= emotionanlly.distant, y=fit), color="blue") +
   geom_ribbon(data=x_p13, aes(x=emotionanlly.distant, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Emotionanlly distant", y="controllability")
 p13_plot
-```
 
-![](images/CI-3.png)<!-- -->
-
-``` r
 effects_p22 <- effects::effect(term= "venting", mod= toy13)
 summary(effects_p22) 
 ```
@@ -4611,11 +4448,7 @@ p22_plot <- ggplot() +
   geom_line(data=x_p22, aes(x= venting, y=fit), color="blue") +
   geom_ribbon(data=x_p22, aes(x=venting, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Venting", y="controllability")
 p22_plot
-```
 
-![](images/CI-4.png)<!-- -->
-
-``` r
 effects_p24 <- effects::effect(term= "effort.to.fight.cancer", mod= toy13)
 summary(effects_p24) 
 ```
@@ -4644,11 +4477,7 @@ p24_plot <- ggplot() +
   geom_line(data=x_p24, aes(x= effort.to.fight.cancer, y=fit), color="blue") +
   geom_ribbon(data=x_p24, aes(x=effort.to.fight.cancer, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Effort to fight cancer", y="controllability")
 p24_plot
-```
 
-![](images/CI-5.png)<!-- -->
-
-``` r
 effects_p26 <- effects::effect(term= "pressure.and.effort.to.work", mod= toy13)
 summary(effects_p26) 
 ```
@@ -4677,11 +4506,7 @@ p26_plot <- ggplot() +
   geom_line(data=x_p26, aes(x= pressure.and.effort.to.work, y=fit), color="blue") +
   geom_ribbon(data=x_p26, aes(x=pressure.and.effort.to.work, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Pressure and effort to work", y="controllability")
 p26_plot
-```
 
-![](images/CI-6.png)<!-- -->
-
-``` r
 effects_p30 <- effects::effect(term= "detailed.symptom.description", mod= toy13)
 summary(effects_p30) 
 ```
@@ -4710,11 +4535,7 @@ p30_plot <- ggplot() +
   geom_line(data=x_p30, aes(x= detailed.symptom.description, y=fit), color="blue") +
   geom_ribbon(data=x_p30, aes(x=detailed.symptom.description, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="detailed.symptom.description", y="controllability")
 p30_plot
-```
 
-![](images/CI-7.png)<!-- -->
-
-``` r
 effects_p33 <- effects::effect(term= "financial.stress", mod= toy13)
 summary(effects_p33) 
 ```
@@ -4745,9 +4566,9 @@ p33_plot <- ggplot() +
 p33_plot
 ```
 
-![](images/CI-8.png)<!-- -->
+![](images/CI-1.png)![](images/CI-2.png)![](images/CI-3.png)![](images/CI-4.png)![](images/CI-5.png)![](images/CI-6.png)![](images/CI-7.png)![](images/CI-8.png)
 
-# 13 Explanation of the results
+# 12 Explanation of the results
 
 After controlled for participant ID, baseline controllability, and
 participant education, “symptom experience description” is a marginal
@@ -4841,37 +4662,36 @@ sessionInfo()
     [17] readxl_1.3.1    
 
     loaded via a namespace (and not attached):
-      [1] minqa_1.2.4         colorspace_2.0-2    ggsignif_0.6.3     
-      [4] ellipsis_0.3.2      rio_0.5.27          sjlabelled_1.1.8   
-      [7] estimability_1.3    htmlTable_2.3.0     parameters_0.15.0  
-     [10] base64enc_0.1-3     rstudioapi_0.13     ggpubr_0.4.0       
-     [13] farver_2.1.0        ggrepel_0.9.1       fansi_0.5.0        
-     [16] mvtnorm_1.1-3       codetools_0.2-18    splines_4.1.1      
-     [19] knitr_1.33          effects_4.2-0       sjmisc_2.8.7       
-     [22] nloptr_1.2.2.2      ggeffects_1.1.1     broom_0.7.9        
-     [25] cluster_2.1.2       png_0.1-7           effectsize_0.5     
-     [28] compiler_4.1.1      sjstats_0.18.1      emmeans_1.7.0      
-     [31] backports_1.2.1     assertthat_0.2.1    fastmap_1.1.0      
-     [34] survey_4.1-1        htmltools_0.5.2     tools_4.1.1        
-     [37] coda_0.19-4         gtable_0.3.0        glue_1.4.2         
-     [40] Rcpp_1.0.7          cellranger_1.1.0    vctrs_0.3.8        
-     [43] nlme_3.1-152        insight_0.14.5      xfun_0.25          
-     [46] stringr_1.4.0       openxlsx_4.2.4      lifecycle_1.0.0    
-     [49] rstatix_0.7.0       MASS_7.3-54         scales_1.1.1       
-     [52] hms_1.1.0           RColorBrewer_1.1-2  yaml_2.2.1         
-     [55] curl_4.3.2          gridExtra_2.3       rpart_4.1-15       
-     [58] latticeExtra_0.6-29 stringi_1.7.4       highr_0.9          
-     [61] bayestestR_0.11.0   checkmate_2.0.0     boot_1.3-28        
-     [64] zip_2.2.0           rlang_0.4.11        pkgconfig_2.0.3    
-     [67] evaluate_0.14       purrr_0.3.4         htmlwidgets_1.5.4  
-     [70] labeling_0.4.2      tidyselect_1.1.1    plyr_1.8.6         
-     [73] magrittr_2.0.1      R6_2.5.1            generics_0.1.0     
-     [76] DBI_1.1.1           pillar_1.6.2        haven_2.4.3        
-     [79] foreign_0.8-81      withr_2.4.2         mgcv_1.8-36        
-     [82] datawizard_0.2.1    abind_1.4-5         nnet_7.3-16        
-     [85] tibble_3.1.4        performance_0.8.0   modelr_0.1.8       
-     [88] crayon_1.4.1        utf8_1.2.2          rmarkdown_2.10     
-     [91] jpeg_0.1-9          grid_4.1.1          data.table_1.14.0  
-     [94] forcats_0.5.1       digest_0.6.27       xtable_1.8-4       
-     [97] tidyr_1.1.3         numDeriv_2016.8-1.1 munsell_0.5.0      
-    [100] mitools_2.4        
+     [1] minqa_1.2.4         colorspace_2.0-2    ggsignif_0.6.3     
+     [4] ellipsis_0.3.2      rio_0.5.27          sjlabelled_1.1.8   
+     [7] estimability_1.3    htmlTable_2.3.0     parameters_0.15.0  
+    [10] base64enc_0.1-3     rstudioapi_0.13     ggpubr_0.4.0       
+    [13] farver_2.1.0        ggrepel_0.9.1       fansi_0.5.0        
+    [16] mvtnorm_1.1-3       splines_4.1.1       knitr_1.33         
+    [19] effects_4.2-0       sjmisc_2.8.7        nloptr_1.2.2.2     
+    [22] ggeffects_1.1.1     broom_0.7.9         cluster_2.1.2      
+    [25] png_0.1-7           effectsize_0.5      compiler_4.1.1     
+    [28] sjstats_0.18.1      emmeans_1.7.0       backports_1.2.1    
+    [31] assertthat_0.2.1    fastmap_1.1.0       survey_4.1-1       
+    [34] htmltools_0.5.2     tools_4.1.1         coda_0.19-4        
+    [37] gtable_0.3.0        glue_1.4.2          Rcpp_1.0.7         
+    [40] cellranger_1.1.0    vctrs_0.3.8         nlme_3.1-152       
+    [43] insight_0.14.5      xfun_0.25           stringr_1.4.0      
+    [46] openxlsx_4.2.4      lifecycle_1.0.0     rstatix_0.7.0      
+    [49] MASS_7.3-54         scales_1.1.1        hms_1.1.0          
+    [52] RColorBrewer_1.1-2  yaml_2.2.1          curl_4.3.2         
+    [55] gridExtra_2.3       rpart_4.1-15        latticeExtra_0.6-29
+    [58] stringi_1.7.4       highr_0.9           bayestestR_0.11.0  
+    [61] checkmate_2.0.0     boot_1.3-28         zip_2.2.0          
+    [64] rlang_0.4.11        pkgconfig_2.0.3     evaluate_0.14      
+    [67] purrr_0.3.4         htmlwidgets_1.5.4   labeling_0.4.2     
+    [70] tidyselect_1.1.1    plyr_1.8.6          magrittr_2.0.1     
+    [73] R6_2.5.1            generics_0.1.0      DBI_1.1.1          
+    [76] pillar_1.6.2        haven_2.4.3         foreign_0.8-81     
+    [79] withr_2.4.2         mgcv_1.8-36         datawizard_0.2.1   
+    [82] abind_1.4-5         nnet_7.3-16         tibble_3.1.4       
+    [85] performance_0.8.0   modelr_0.1.8        crayon_1.4.1       
+    [88] utf8_1.2.2          rmarkdown_2.10      jpeg_0.1-9         
+    [91] grid_4.1.1          data.table_1.14.0   forcats_0.5.1      
+    [94] digest_0.6.27       xtable_1.8-4        tidyr_1.1.3        
+    [97] numDeriv_2016.8-1.1 munsell_0.5.0       mitools_2.4        
