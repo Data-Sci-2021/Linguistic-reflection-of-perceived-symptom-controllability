@@ -21,7 +21,8 @@ The dependent variable symptom controllability was measured using Symptom repres
 * [LICENSE](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/LICENSE.md) This is the licence for the project. 
 * [Dictionary](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/tree/main/Dictionary) This folder includes self-designed and LIWC2015 word categories. 
 * [images](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/tree/main/images) This folder contains all the figures generated from the complete analysis. 
-* [2 analyses in progress](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/tree/main/2%20analyses%20in%20progress) This folder contains screenshots of two analyses in-progress.  
+* [2 analyses in progress](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/tree/main/2%20analyses%20in%20progress) This folder contains screenshots of two analyses in-progress. 
+* [Project presentation](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/linguistic%20reflection%20of%20symptom%20controllability.pdf)
 
 
 
