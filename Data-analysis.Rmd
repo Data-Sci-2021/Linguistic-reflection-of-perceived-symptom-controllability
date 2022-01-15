@@ -1,0 +1,470 @@
+---
+title: "Data analysis"
+author: "Yan Wang"
+date: "13/12/2021"
+output: 
+  github_document:
+    toc: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = NA, fig.path = "images/", fig.show="hold")
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(lme4)
+```
+
+# Load the dataset 
+
+Data sets of the extracted linguistic features and sociodemographic factors. 
+
+```{r}
+Df<-read.csv("~/Desktop/ResultsDf8BL.csv")
+Metadata<-read_excel("~/Desktop/DS4Ling-2021/old repository/private/DS4Lingdataset/Metadata of participants.xlsx")
+Df$controlNN[is.na(Df$controlNN)]=0
+Df$controlVB[is.na(Df$controlVB)]=0
+Df[is.na(Df)]
+Df$controlNN<-Df$controlNN/Df$WC*100
+Df$controlVB<-Df$controlVB/Df$WC*100
+names(Df)
+Df<- Df %>% dplyr::select(2, 4:7,11:112)
+```
+# Processing 
+
+## Let's add an indicator for the repeated measures of controllability score
+when the score was measured at baseline, the indicator is 0 and when the score was measured at 8 wks, the indicator is 1. 
+
+```{r}
+Df$Time<-ifelse(Df$Time=="Baseline (week 0)", 0, 1)
+```
+    
+## Merge the linguistic feature and sociodemographic datasets to get data set DfNew
+```{r}
+names(Metadata)
+Metadata<- Metadata[, c(1, 3, 8:12)]
+DfNew<-left_join(Df, Metadata, by="ID") %>% select(1 , 108:113, everything())
+head(DfNew[2:113], 2)
+```
+## DfNew description
+  "ID"- Participant ID 
+  
+  "Controllability" - Symptom controllability score changes at baseline and 8 weeks
+  
+  "WC" - Total word count
+  
+  "Employment" - Employed vs unemployed
+  
+  "Marriage" - Currently married, divorced, Living with partner/significant other, never married, separated, widowed
+  
+  "race" -  American Indian, bi/Multi-racial Black or African American, White, other, unknown 
+  
+  "ethinicity" - Latino, not latino, Don not know
+  
+  "Age" - Age in years 
+  
+  "Formaleducationyears" - Years of formal education 
+  
+  "SymptomNo"- Symptom number participant worked on (i.e., S1, S2, S3)
+  
+  "Symptom" - Target symptom participant works on (e.g., pain, nausea)  
+  
+   The rest of the variables are the percentage of that specific word or punctuation category of the total word count in the posts. For example, variable "symptom" is the percentage of symptom word category (e.g., drowsy, lose hair) of the total word count. The scale is from 0-100. 
+
+# Descriptive stats of the controllability score changes @ baseline and 8 wks
+
+## Baseline controllability descriptive stats and distribution - normality assumed
+```{r Boxplots and desc stats BL}
+Df<- DfNew %>% na.omit()
+Df1<-Df %>% filter(Time==0)
+ggplot(Df1)+
+  geom_boxplot(aes(Controllability))+
+  theme_bw()+
+  theme(legend.position="none")+xlab("Baseline controllability score")
+library(pastecs)
+stat.desc(Df1$Controllability)
+quantile(Df1$Controllability, 0.75)-quantile(Df1$Controllability, 0.25)
+table(Df1$Controllability)
+```
+
+```{r}
+shapiro.test(Df1$Controllability)
+```
+
+```{r Histogram BL}
+ggplot(Df1)+ 
+  geom_histogram(binwidth=0.05, color="blue",aes(x= Controllability, y=..density.., fill=..count..))+ 
+  stat_function(fun=dnorm,color="blue",
+                args=list(mean=mean(Df1$Controllability),sd=sd(Df1$Controllability)))+xlab("Baseline controllability score ")
+```
+
+```{r QQplots BL}
+qq<-data.frame(c(Df1,qqnorm(Df1$Controllability)))
+ggplot(qq,aes(x=x,y=y,legend.position="none"))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="Q-Q Normal Plot",x="Theoretic",y="Observed")+
+  theme_bw()
+
+```
+
+
+## 8 week descriptive stats and controllability distribution - normality violated
+
+```{r Boxplots and desc stats 8wk}
+Df2<-Df %>% filter(Time==1)
+ggplot(Df)+
+  geom_boxplot(aes(Df$Controllability))+
+  theme_bw()+
+  theme(legend.position="none")+xlab("Controllability score at 8 weeks")
+shapiro.test(Df$Controllability)
+stat.desc(Df$Controllability)
+quantile(Df$Controllability, 0.75)-quantile(Df$Controllability, 0.25)
+table(Df$Controllability)
+```
+
+```{r}
+shapiro.test(Df$Controllability)
+```
+
+```{r Histogram 8wk}
+ggplot(Df2)+ 
+  geom_histogram(binwidth=0.05, color="blue",aes(x= Controllability, y=..density.., fill=..count..))+ 
+  stat_function(fun=dnorm,color="blue",
+                args=list(mean=mean(Df2$Controllability),sd=sd(Df2$Controllability)))+xlab("Controllability score at 8 weeks")
+```
+
+```{r QQplots 8wk}
+qq<-data.frame(c(Df,qqnorm(Df$Controllability)))
+ggplot(qq,aes(x=x,y=y,legend.position="none"))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="Q-Q Normal Plot",x="Theoretic",y="Observed")+
+  theme_bw()
+```
+
+
+
+# Sample descriptive stats 
+
+Sample size (157 participants) is bigger than the sample size I used in mixed effect model (112 participants and 314 posts). 
+
+Participants are predominantly married or Living with partner/significant other(75.16%), white (93%), non-hispanic (96.18%), unemployed (59.24%). 
+The mean of age is 58.18 (SD = 9.72). The average of formal years of education is 14.4 (SD=2.72)
+```{r Age}
+names(Metadata)
+Metadata<-na.omit(Metadata)
+stat.desc(Metadata$Age)
+quantile(Metadata$Age, 0.75,na.rm = TRUE)-quantile(Metadata$Age, 0.25, na.rm = TRUE)
+ggplot(Metadata)+ 
+  geom_histogram(binwidth=0.1, color="blue",aes(x=Age, y=..density.., fill=..count..))+ 
+  stat_function(fun=dnorm,color="blue",
+                args=list(mean=mean(Metadata$Age),sd=sd(Metadata$Age)))
+shapiro.test(Metadata$Age)
+```
+
+```{r Formal years of education}
+stat.desc(Metadata$Formaleducationyears)
+quantile(Metadata$Formaleducationyears, 0.75,na.rm = TRUE)-quantile(Metadata$Formaleducationyears, 0.25, na.rm = TRUE)
+ggplot(Metadata)+ 
+  geom_histogram(binwidth=0.5, color="blue",aes(x=Formaleducationyears, y=..density.., fill=..count..))+ 
+  stat_function(fun=dnorm,color="blue",
+                args=list(mean=mean(Metadata$Formaleducationyears),sd=sd(Metadata$Formaleducationyears)))
+shapiro.test(Metadata$Formaleducationyears)
+```
+
+```{r Marriage status}
+table(Metadata$Marriage) %>% addmargins()
+```
+
+```{r Race}
+table(Metadata$race)%>% addmargins()
+```
+
+```{r Ethinicity}
+table(Metadata$`ethinicity (latio)`)%>% addmargins()
+```
+
+```{r Employment}
+table(Metadata$Employment)%>% addmargins() 
+#since there is only one individual chose never employed, I will code it as No
+Metadata$Employment[Metadata$Employment=="Never employed"]<-"No"
+```
+
+
+# Preliminary bivariate correlations 
+
+Pearson correlations between the dependent variable and potential predictors 
+```{r Bivariate correlation}
+# there is no variation in "Quote" variable, so let's delete it
+Df2<-Df2[, -110]
+library(Hmisc)
+library(corrgram)
+res <- cor(Df2[11:112])
+round(res, 2)[,1]
+corrgram(Df2 %>% select (Controllability, WC, symptom, controlled, controlNN,anx,feel, body, ingest, focuspresent, money, informal, nonflu, negate, discrep, certain, Analytic, Sixltr, prep), order=FALSE, lower.panel=panel.shade,
+  upper.panel=panel.pie, text.panel=panel.txt,
+  main="IVs and DV correlation")
+```
+
+# Model building
+
+The analysis is exploratory in nature and I used full purpose-oriented predictor selection. 
+Random effect: use participant ID
+Covariate:social demographic factors, e.g., marriage status, age, education, employment, race, ethnicity because patients were predominantly non-Hispanic white), and symptom selected (pain, fatigue)
+
+## Individual linguistic features as potential fixed effects in model building
+```{r Decide on covairates}
+#install.packages("lmerTest")
+library(lmerTest)
+library(car)
+# since there is little variation in race and enthnicity, so I wont include them. 
+mod1<-lmer(Controllability ~ Time +SymptomName+ Marriage+Age+ Formaleducationyears+Employment+(1|ID), Df)
+summary(mod1)
+
+# we will keep age, formal years of education, marriage status as covariates. Age is never a significant predictor, but it is an important patient characteristic. 
+mod2<-lmer(Controllability ~ Time +SymptomName+Marriage+ Age+ Formaleducationyears+(1|ID), Df)
+summary(mod2)
+anova(mod1, mod2)
+car::vif(mod2)
+```
+
+However, after controlling for the covairates and adjusting for baseline score, no linguistic features is significant in predicting perceived symptom controllability at 8 weeks. Therefore, I used PCA on all the linguistic features to yield potential underlying constructs. 
+
+## PCA on linguistic features - Screeplot & Eigenvalues
+
+I will use 33 components bcz the eigenvalue >1, explaining 75.85% of the variance 
+```{r screeplot}
+modDf<-Df %>% select (12:109, 111:113)
+#install.packages("factoextra")
+library(factoextra)
+pca<-prcomp(modDf, scale=TRUE, center = TRUE)
+fviz_eig(pca, ncp = 33)
+#Eigenvalues
+eig.val<-get_eigenvalue(pca)
+eig.val %>% filter(eigenvalue >1)
+ind.coord<-pca$x
+ind.coord1<- as.data.frame(ind.coord[,1:33])
+modDf1<-cbind(Df, ind.coord1)
+```
+
+## PCs as potential fixed effects with iterative backward elimination technique in model building
+
+Model with ID as random effects and PC1-PC33 as fixed effects. I used iterative backward elimination and chose final model based on AIC
+
+```{r PC1-PC33 as fixed effects}
+mod0<-lmer(Controllability ~ Time +SymptomName+Marriage+ Age+ Formaleducationyears+(1|ID), modDf1)
+summary(mod0)
+mod1<- lmer(Controllability ~ Time +SymptomName+Marriage+ Age+ Formaleducationyears+PC1+PC2+PC3+PC4+PC5+PC6+PC7+PC8+PC9+PC10+PC11+PC12+PC13+PC14+PC15+PC16+PC17+PC18+PC19+PC20+PC21+PC22+PC23+PC24+PC25+PC26+PC27+PC28+PC29+PC30+PC31+PC32+PC33+(1|ID), modDf1)
+summary(mod1) 
+car::vif(mod1)
+```
+
+I used iterative backward elimination and chose the model with the lowest AIC
+principal 15, 17, 18, 1, 25, 29 were included in the final mod.
+```{r Final}
+modfinal<- lmer(Controllability ~ Time +SymptomName+Marriage+ Age+ Formaleducationyears+PC1+PC15+PC25+PC29+PC17+PC18+(1|ID), modDf1)
+summary(modfinal) 
+anova(mod1, modfinal)
+car::vif(modfinal)
+```
+
+## Variable loadings on significant components 15, 17, 18 and marginal significant components 1, 25, 29
+```{r C1 loadings}
+# component 1 is reflect and analyze symptom representations and management (+)
+p1<-sort(pca$rotation[,1], decreasing = TRUE) %>% as.data.frame()
+p1<-cbind(wordCategory = rownames(p1), p1)
+rownames(p1) <- 1:nrow(p1)
+names(p1)[2]<-"loadings"
+ggplot(p1 %>% filter(loadings>0.12))+geom_col(aes(x=wordCategory, y=loadings))+ labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC1:Analyze symptom and management")
+```
+
+
+```{r C5 loadings}
+# component 15 is social support (+)
+P15<-sort(pca$rotation[,15], decreasing = TRUE) %>% as.data.frame()
+P15<-cbind(wordCategory = rownames(P15), P15)
+rownames(P15) <- 1:nrow(P15)
+names(P15)[2]<-"loadings"
+ggplot(P15 %>% filter(loadings>0.15))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC15:Social support")
+
+```
+
+
+```{r C17 loadings}
+# component 17 is discuss sexual relationship with partner and sexual concerns (+) -----
+# pronoun reveal the subject of attention- we - self-reference   
+p17<-sort(pca$rotation[,17], decreasing = TRUE) %>% as.data.frame()
+p17<-cbind(wordCategory = rownames(p17), p17)
+rownames(p17) <- 1:nrow(p17)
+names(p17)[2]<-"loadings"
+ggplot(p17 %>% filter(loadings>0.14))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC17:Discuss sexual relationship with partner and sexual concerns")
+```
+
+```{r C18 loadings}
+# component 18 is to attempt creating narratives of symptom and its management (+) ------
+p18<-sort(pca$rotation[,18], decreasing = TRUE) %>% as.data.frame()
+p18<-cbind(wordCategory = rownames(p18), p18)
+rownames(p18) <- 1:nrow(p18)
+names(p18)[2]<-"loadings"
+ggplot(p18 %>% filter(loadings>0.13))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC18:Attempt to create narratives of symptom and management")
+```
+
+```{r  C25 loadings}
+# component 25 Informal online writing(-)
+# speech samples high on the informality factor tended to be personal conversations or informal writing samples. It is personal and more casual. online writing 
+p25<-sort(pca$rotation[,25], decreasing = TRUE) %>% as.data.frame()
+p25<-cbind(wordCategory = rownames(p25), p25)
+rownames(p25) <- 1:nrow(p25)
+names(p25)[2]<-"loadings"
+ggplot(p25 %>% filter(loadings>0.16))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC25:Informal online writing")
+```
+
+```{r C29 loadings}
+# component 29 (+) is using strategies to manage symptoms----
+p29<-sort(pca$rotation[,29], decreasing = TRUE) %>% as.data.frame()
+p29<-cbind(wordCategory = rownames(p29), p29)
+rownames(p29) <- 1:nrow(p29)
+names(p29)[2]<-"loadings"
+ggplot(p29 %>% filter(loadings>0.14))+geom_col(aes(x=wordCategory, y=loadings))+labs(y="Percent Contribution to PC", x="Word Category") + ggtitle("PC29:Using strategies to manage symptoms")
+```
+
+## Final model and visualization 
+
+```{r}
+names(modDf1)[c(7, 10, 114, 128, 130, 131, 138,142)]<-c("Years.of.formal.education", "Symptom", "Analyze.symptom.and.management","Discuss.sexual.relationship.and.concerns", "Social.support", "Attempt.to.create.narratives.of.symptom.and.management", "Informal.online.writing", "Using.symptom.management.strategies")
+modfinal<-lmer(Controllability ~ Analyze.symptom.and.management+
+               Discuss.sexual.relationship.and.concerns+
+                 Social.support +
+              Attempt.to.create.narratives.of.symptom.and.management+
+                 Informal.online.writing + Using.symptom.management.strategies+ Age+
+                 Years.of.formal.education+ Marriage+Time +Symptom+ (1|ID), modDf1)
+summary(modfinal)
+vif(modfinal)
+```
+
+```{r modfinal model}
+library(sjPlot)
+library(webshot)
+sjPlot::plot_model(modfinal, show.values=TRUE, show.p=TRUE,title="Effect of linguistic features on controllability", fig.height=50, fig.width=20, digits = 2, dot.size = 0.8, value.size = 2.5)
+sjPlot::tab_model(modfinal, file = "modelplot.html")
+```
+
+## Final model diagnostic plots
+```{r CI modfinal diagnostics plot}
+#homogeniety
+plot(modfinal)
+#normality assumed
+qqnorm(resid(modfinal))
+
+modDf2 <- na.omit(modDf1)
+# Linearity of the predictors are assumed
+ggplot(data.frame(x1=modDf2$Analyze.symptom.and.management,pearson=residuals(modfinal,type="pearson")),
+      aes(x=x1,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Analyze symptom representations and management")
+
+ggplot(data.frame(x2=modDf2$Discuss.sexual.relationship.and.concerns,pearson=residuals(modfinal,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Discuss sexual relationship and concerns")
+
+ggplot(data.frame(x2=modDf2$Social.support,pearson=residuals(modfinal,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Social support")
+
+ggplot(data.frame(x2=modDf2$Attempt.to.create.narratives.of.symptom.and.management,pearson=residuals(modfinal,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Attempt to create narratives of symptom experience and management")
+
+ggplot(data.frame(x2=modDf2$Informal.online.writing,pearson=residuals(modfinal,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Informal online writing")
+
+
+ggplot(data.frame(x2=modDf2$Using.symptom.management.strategies,pearson=residuals(modfinal,type="pearson")),
+      aes(x=x2,y=pearson)) +
+    geom_point() +
+    theme_bw()+xlab("Using symptom management strategies")
+```
+
+## 95% Confidence interval of coefficients
+
+```{r CI Analyze symptom management }
+# Coeffiencient with 95% CI band
+effects_p1 <- effects::effect(term= "Analyze.symptom.and.management", mod= modfinal)
+x_p1<-as.data.frame(effects_p1)
+p1_plot <- ggplot() + 
+  geom_point(data=modDf1, aes(x=Analyze.symptom.and.management, y=Controllability))+
+  geom_point(data=x_p1, aes(x=Analyze.symptom.and.management, y=fit ), color="blue")+
+  geom_line(data=x_p1, aes(x= Analyze.symptom.and.management, y=fit), color="blue") +
+  geom_ribbon(data=x_p1, aes(x=Analyze.symptom.and.management, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Analyze symptom and management", y="controllability")
+p1_plot
+```
+
+```{r CI Discuss sexual relationship and concerns}
+effects_p15 <- effects::effect(term= "Discuss.sexual.relationship.and.concerns", mod= modfinal)
+x_p15<-as.data.frame(effects_p15)
+p15_plot <- ggplot() + 
+  geom_point(data=modDf1, aes(x=Discuss.sexual.relationship.and.concerns, y=Controllability))+
+  geom_point(data=x_p15, aes(x=Discuss.sexual.relationship.and.concerns, y=fit ), color="blue") +
+  geom_line(data=x_p15, aes(x= Discuss.sexual.relationship.and.concerns, y=fit), color="blue") +
+  geom_ribbon(data=x_p15, aes(x=Discuss.sexual.relationship.and.concerns, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Discuss sexual relationship and concerns", y="controllability")
+p15_plot
+```
+
+```{r CI Social support}
+effects_P17 <- effects::effect(term= "Social.support", mod= modfinal)
+x_P17<-as.data.frame(effects_P17)
+P17_plot <- ggplot() + 
+  geom_point(data=modDf1, aes(x=Social.support, y=Controllability))+
+  geom_point(data=x_P17, aes(x=Social.support, y=fit ), color="blue") +
+  geom_line(data=x_P17, aes(x= Social.support, y=fit), color="blue") +
+  geom_ribbon(data=x_P17, aes(x=Social.support, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Social support", y="controllability")
+P17_plot
+```
+
+```{r CI Attempt to create narratives of symptom experience and management}
+effects_p18 <- effects::effect(term= "Attempt.to.create.narratives.of.symptom.and.management", mod= modfinal)
+x_p18<-as.data.frame(effects_p18)
+p18_plot <- ggplot() + 
+  geom_point(data=modDf1, aes(x=Attempt.to.create.narratives.of.symptom.and.management, y=Controllability))+
+  geom_point(data=x_p18, aes(x=Attempt.to.create.narratives.of.symptom.and.management, y=fit ), color="blue") +
+  geom_line(data=x_p18, aes(x=Attempt.to.create.narratives.of.symptom.and.management, y=fit), color="blue") +
+  geom_ribbon(data=x_p18, aes(x=Attempt.to.create.narratives.of.symptom.and.management, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Attempt to create narratives of symptom experience and management", y="controllability")
+p18_plot
+```
+
+```{r CI Informal.online.writing}
+effects_p25 <- effects::effect(term= "Informal.online.writing", mod= modfinal)
+x_p25<-as.data.frame(effects_p25)
+p25_plot <- ggplot() + 
+  geom_point(data=modDf1, aes(x=Informal.online.writing, y=Controllability))+
+  geom_point(data=x_p25, aes(x=Informal.online.writing, y=fit ), color="blue") +
+  geom_line(data=x_p25, aes(x= Informal.online.writing, y=fit), color="blue") +
+  geom_ribbon(data=x_p25, aes(x=Informal.online.writing, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Informal online writing", y="controllability")
+p25_plot
+```
+
+```{r CI Using symptom management strategies}
+effects_p29 <- effects::effect(term= "Using.symptom.management.strategies", mod= modfinal)
+x_p29<-as.data.frame(effects_p29)
+p29_plot <- ggplot() + 
+  geom_point(data=modDf1, aes(x=Using.symptom.management.strategies, y=Controllability))+
+  geom_point(data=x_p29, aes(x=Using.symptom.management.strategies, y=fit ), color="blue") +
+  geom_line(data=x_p29, aes(x= Using.symptom.management.strategies, y=fit), color="blue") +
+  geom_ribbon(data=x_p29, aes(x=Using.symptom.management.strategies, ymin=lower, ymax=upper), alpha= 0.3, fill="blue") + labs(x="Using symptom management strategies", y="controllability")
+p29_plot
+```
+
+
+```{r}
+sessionInfo()
+```
+
+
+
