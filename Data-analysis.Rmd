@@ -258,7 +258,6 @@ mod0<-lmer(Controllability ~ Time +SymptomName+Marriage+ Age+ Formaleducationyea
 summary(mod0)
 mod1<- lmer(Controllability ~ Time +SymptomName+Marriage+ Age+ Formaleducationyears+PC1+PC2+PC3+PC4+PC5+PC6+PC7+PC8+PC9+PC10+PC11+PC12+PC13+PC14+PC15+PC16+PC17+PC18+PC19+PC20+PC21+PC22+PC23+PC24+PC25+PC26+PC27+PC28+PC29+PC30+PC31+PC32+PC33+(1|ID), modDf1)
 summary(mod1) 
-car::vif(mod1)
 ```
 
 I used iterative backward elimination and chose the model with the lowest AIC
@@ -340,8 +339,6 @@ modfinal<-lmer(Controllability ~ Analyze.symptom.and.management+
               Attempt.to.create.narratives.of.symptom.and.management+
                  Informal.online.writing + Using.symptom.management.strategies+ Age+
                  Years.of.formal.education+ Marriage+Time +Symptom+ (1|ID), modDf1)
-summary(modfinal)
-vif(modfinal)
 ```
 
 ```{r modfinal model}
