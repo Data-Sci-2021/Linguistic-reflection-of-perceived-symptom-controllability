@@ -1,0 +1,85 @@
+---
+title: "Data processing"
+author: "Yan Wang"
+date: "10/01/2022"
+output: 
+  github_document:
+    toc: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+SQR<-read_excel("~/Desktop/DS4Ling-2021/old repository/private/DS4Lingdataset/SQR.xlsx")
+OEQ<-read_excel("~/Desktop/DS4Ling-2021/old repository/private/DS4Lingdataset/OEQ- text.xlsx")
+Metadata<-read_excel("~/Desktop/DS4Ling-2021/old repository/private/DS4Lingdataset/Metadata of participants.xlsx")
+```
+
+# Data set description
+
+Data set 1 SQR: participant ID, time of controllability assessment, symptom sequence, and 3 mean controllability scores
+
+Data set 2 OEQ: participant ID, symptom  and answers for the 5 questions: 
+
+1. What does the symptom make you feel like? 
+
+2. What do you think is causing your symptom? 
+
+3. When did you first notice it, and does it follow any sort of pattern? 
+
+4. How does the symptom affect you?
+
+5. Have you tried anything? Is it helpful?
+
+Data set 3 Metadata: participant ID and sociodemographics, including age, marrige status, employment, education, race, ethnicity. 
+
+# Data preparation
+
+```{r}
+names(SQR)
+SQR_8BL<- SQR %>% filter(`Administration Number`=="Baseline (week 0)"|`Administration Number`== "8 week f/u")
+names(SQR_8BL)[3:9]<-c("Time", "S1Cont", "S2Cont", "S3Cont" , "S1", "S2", "S3")
+names(SQR_8BL)
+```
+
+## Reshape Df1 because we want one patient has multiple entries for symptoms, baseline contrallability scores, and controllability scores
+
+```{r}
+library(tidyverse)
+SQR_8BL1<-
+  SQR_8BL %>%
+  gather("S1","S2","S3",key="SymptomSequence",value="SymptomName") %>% select(-c(4:6))
+SQR_8BL2<-
+  SQR_8BL %>%
+  gather("S1Cont","S2Cont","S3Cont",key="SymptomSequence",value="Controllability") %>% select(-c(4:6))
+SQR_8BL2$SymptomSequence<-as.factor(SQR_8BL2$SymptomSequence)
+SQR_8BL1$SymptomSequence<-as.factor(SQR_8BL1$SymptomSequence)
+levels(SQR_8BL2$SymptomSequence)[1]<-"S1"
+levels(SQR_8BL2$SymptomSequence)[2]<-"S2"
+levels(SQR_8BL2$SymptomSequence)[3]<-"S3"
+levels(SQR_8BL1$SymptomSequence)
+head(SQR_8BL1)[3:5]
+head(SQR_8BL2)[3:5]
+```
+
+```{r}
+Df<- inner_join(SQR_8BL1, SQR_8BL2, by= c("Participant ID", "GOGID", "Time", "SymptomSequence")) %>% na.omit()
+names(Df)[1]<-"ID"
+```
+
+## Merge with OEQ (text data) by participant ID and Symptom
+```{r}
+names(OEQ)[1:2]<-c("ID", "SymptomName")
+Df8BL<-left_join(Df ,OEQ, by=c("ID", "SymptomName")) %>% na.omit()
+names(Df8BL)[7:9]<-c("FeelingCause", "Effect", "Strategy")
+```
+
+## Save the output for the linguisic feature extraction
+```{r}
+write.csv(Df8BL, "~/Desktop/Df8BL for text analysis.csv")
+```
+
