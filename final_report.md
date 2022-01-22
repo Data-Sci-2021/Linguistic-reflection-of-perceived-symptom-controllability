@@ -1,338 +1,263 @@
 final\_report
 ================
 Yan Wang
-12/10/2021
+10/1/2022
 
--   [1 Data](#data)
-    -   [1.1 Parent study](#parent-study)
-    -   [1.2 Design and sample](#design-and-sample)
-    -   [1.3 Dependent variable measure](#dependent-variable-measure)
-    -   [1.4 Data preparation](#data-preparation)
-    -   [1.5 Data sharing](#data-sharing)
--   [2 Analysis](#analysis)
-    -   [2.1 Multiple data sets are reshaped and merged in
-        R](#multiple-data-sets-are-reshaped-and-merged-in-r)
-    -   [2.2 Feature extraction in LIWC2015 and
-        LightSide](#feature-extraction-in-liwc2015-and-lightside)
-    -   [2.3 Data analysis in R](#data-analysis-in-r)
-    -   [2.4 Results](#results)
-        -   [2.4.1 Sample characteristics](#sample-characteristics)
-        -   [2.4.2 Final model 1](#final-model-1)
-        -   [2.4.3 Final model 2](#final-model-2)
-        -   [2.4.4 Compare final model 1 and
-            2](#compare-final-model-1-and-2)
-        -   [2.4.5 Explanation of final model
-            2](#explanation-of-final-model-2)
--   [3 Conclusions and implications](#conclusions-and-implications)
--   [4 Limitations](#limitations)
--   [5 Project history](#project-history)
+-   [1 Overview](#overview)
+-   [2 Parent study](#parent-study)
+-   [3 Sample and data](#sample-and-data)
+-   [4 Analysis](#analysis)
+-   [5 Results](#results)
+    -   [5.1 Sample characteristics](#sample-characteristics)
+    -   [5.2 Principal component analysis
+        (PCA)](#principal-component-analysis-pca)
+    -   [5.3 Model of patient perceived symptom
+        controllability](#model-of-patient-perceived-symptom-controllability)
+-   [6 Conclusions and implications](#conclusions-and-implications)
+-   [7 Limitations](#limitations)
+-   [8 Data sharing](#data-sharing)
+-   [9 Project history](#project-history)
 
 [Images
 folder](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/tree/main/images)
 
-# 1 Data
+# 1 Overview
 
-## 1.1 Parent study
+The purpose of this secondary analysis is to investigate the linguistic
+reflections of perceived symptom controllability among women with
+recurrent ovarian cancer. The study applied principal component analysis
+to derive underlying constructs from multiple linguistic features and
+mixed-effects model to select important underlying components associated
+with participant sense of control.
 
-WRITE Symptoms was a 3-arm RCT funded by the National Institutes of
-Health/National Institute of Nursing Research NIH/NINR R01NR010735/NRG
-GOG-259 as well as NIH/NCI grants to NRG Oncology (U10CA180822), NRG
-Operations (U10CA180868), and UG1CA189867 (NCORP). Two versions of the
-WRITE Symptoms intervention are based on Representational Approach to
-patient education to improve symptom management, were compared to
-enhanced care-as-usual. In the self-directed arm of WRITE Symptoms
-intervention (SD WRITE), participants engaged in an interactive
-web-based module through intervention components.
+# 2 Parent study
 
-## 1.2 Design and sample
+WRITE Symptoms (Written Representational Intervention To Ease Symptoms)
+was a 3-arm randomized clinical trial (RCT) mainly funded by the
+National Institutes of Health/National Institute of Nursing Research
+R01NR010735/NRG GOG-259. Two versions of the WRITE Symptoms intervention
+are based on the Representational Approach to patient education to
+improve symptom management, were compared to enhanced care-as-usual. In
+the self-directed arm of WRITE Symptoms intervention (SD WRITE),
+participants engaged in an interactive web-based module through
+intervention components.
 
-This is a secondary analysis focused on the association between
-linguistic features and
+# 3 Sample and data
 
-Data included was from the 166 participants randomized to the
-self-directed arm, including sociodemographic factors, perceived symptom
-controllability score changes from baseline to 8 weeks, baseline
-controllability scores, and their posts recorded verbatim in the message
-board. For each participant who worked on each of the selected symptoms,
-they posts reflections on the following questions: 1. What does the
-symptom make you feel like? 2. What do you think is causing your
-symptom? 3. When did you first notice it, and does it follow any sort of
-pattern? 4. How does the symptom affect you? 5. Have you tried anything?
-Is it helpful?
+Data were from the 166 participants randomized to the self-directed arm,
+including sociodemographic factors, perceived symptom controllability
+score at baseline and 8 weeks, target symptoms, and their posts recorded
+verbatim in the message board. For each participant who worked on each
+of the selected symptoms, the posts are the responses to the following
+questions:
+
+1.  What does the symptom make you feel like?
+
+2.  What do you think is causing your symptom?
+
+3.  When did you first notice it, and does it follow any sort of
+    pattern?
+
+4.  How does the symptom affect you?
+
+5.  Have you tried anything? Is it helpful?
+
+Participant posts were manually screened after the trial was completed.
+Perceived symptom controllability was measured by 3 items for each
+symptom addressing the extent to which the person believes that they can
+control the symptom on a 5- point Likert-type scale of 0 (strongly
+disagree) to 4 (strongly agree).
 
 Eligible participants of parent study were 18+ years; and had recurrent
 or persistent ovarian, fallopian or primary peritoneal cancer,
 experiencing 3 or more bothersome symptoms with a gynecologic oncology
 group (GOG) performance status of less than 3; at least 3+ symptoms
 (e.g., pain, fatigue, neuropathy) associated with cancer or treatment;
-and able to read and write in English. The RCT is a national study, and
-the sample is very likely representative of women with recurrent ovarian
-cancer nationwide.
+and able to read and write in English. The RCT was a national study, and
+the sample was very likely representative of women with recurrent
+ovarian cancer nationwide.
 
-## 1.3 Dependent variable measure
+# 4 Analysis
 
-Perceived Symptom controllability was measured by 3 items for each
-symptom addressing the extent to which the person believes that they can
-control the symptom on a 5- point Likert-type scale of 0 (strongly
-disagree) to 4 (strongly agree).
+I designed 9 word categories (i.e., percentage of words in the text that
+are cancer and treatment-related symptoms, effort, impact on life,
+positive adj describing symptom, negative adj describing symptom,
+symptom controlled, symptom uncontrolled, percentage of word control
+used as noun and verb, respectively). I used
+[LIWC2015](http://liwc.wpengine.com/) and [LightSide
+platform](http://ankara.lti.cs.cmu.edu/side/) to extract these 9 word
+categories from the [self-designed
+dictionary](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/Dictionary/SDWRITE.dic)
+and other 93 word categories from the [LIWC2015 internal
+dictionary](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/Dictionary/LIWC2015Dictionary.pdf).
+All the linguistic features, other than the total word count, were
+measured by the percentage of words in the specific word category out of
+the total word count of the posts; the scale of these linguistic
+variables is from 0 to 100.
 
-## 1.4 Data preparation
+I first used individual linguistic features as potential predictors of
+controllability at 8 weeks in building mixed-effects models. However,
+after adjusting for baseline controllability and controlling for
+individuals, target symptoms, and participant sociodemographic factors,
+not a single individual linguistic variable was statistically
+significant associated with participant controllability. Therefore, I
+decided to use principal components analysis of individual linguistic
+variables to extract the potential underlying constructs and use linear
+mixed effect model to structure the relationship between the components
+and controllability at 8 weeks. Principal components were chosen as
+candidate predictors if their eigenvalues are more than 1. I used the
+iterative backward elimination technique to select principle components,
+controlling for the aforementioned set of covariates(i.e., baseline
+controllability, individuals, target symptoms, and participant
+sociodemographic factors). The criteria I used in selecting models are
+AIC (Akaike’s Information Criteria) and BIC (Bayesian Information
+Criteria).
 
-Qualitative data (participant posts) had been manually screened after
-the trial was over.
+The data processing and analysis steps are as the following:
 
-## 1.5 Data sharing
+1.  Multiple data sets are reshaped and merged in R: [Data
+    processing.md](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/Data-processing.md)
+    and [Data
+    processing.Rmd](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/Data-analysis.Rmd)
 
-I used [NLM-Scrubber](https://scrubber.nlm.nih.gov/) designed and
-developed at the National Library of Medicine. The goal is to produce
-HIPAA-compliant deidentified health information for scientific use;
-however, the success rate of this goal depends on the input data. For
-our dataset, it is still possible to reidentify individuals from
-de-identified data with the use of additional information linked to the
-same individuals. Data set can be shared upon request with data use
-agreement.
+2.  Extract linguistic features in LIWC2015 and LightSide
 
-# 2 Analysis
+3.  Export and combined extracted features to a single csv file:
+    [ResultsDf8BL(noIDtexts).csv](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/ResultsDf8BL(noIDtexts).csv)
 
-## 2.1 Multiple data sets are reshaped and merged in R
+4.  Apply principal component analysis (PCA) and build mixed-effect
+    models:
+    [Data-analysis.md](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/Data-analysis.md)
+    and
+    [Data-analysis.Rmd](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/Data-analysis.Rmd)
 
-Data set 1 SQR: ID, time of controllability assessment, up to 3 selected
-symptoms \[S1, S2, S3\] and 3 controllability scores \[S1Cont, S2Cont,
-S3Cont\]; Data set 2 OEQ: ID, symptom, and patient posts on message
-board Data set 3 Metadata: ID and sociodemographics, including age,
-marital status, employment, education, race, ethnicity
+# 5 Results
 
-## 2.2 Feature extraction in LIWC2015 and LightSide
-
-[LIWC2015](http://liwc.wpengine.com/) is the gold standard in
-computerized text analysis. Learn how the words we use in everyday
-language reveal our thoughts, feelings, personality, and motivations. I
-used LIWC2015 to extract linguistic features as potential predictors
-that might reflect the underlying psychological process of participants’
-sense of control. The features extracted include 7 self-designed
-categories ( percentage of words in the text that are cancer and
-treatment-related symptoms, effort, impact on life, positive adj
-describing symptom, negative adj describing symptom, symptom controlled,
-symptom uncontrolled), 4 summary language variables (analytical
-thinking, clout \[confidence\], authenticity, and emotional tone), 3
-general descriptor categories (words per sentence, percent of target
-words captured by the dictionary, and percent of words in the text that
-are longer than six letters), 21 standard linguistic dimensions (e.g.,
-percentage of words in the text that are pronouns, articles, auxiliary
-verbs, etc.), 41-word categories tapping psychological constructs (e.g.,
-affect, cognition, biological processes, drives), 6 personal concern
-categories (e.g., percentage of words in the text that are work, home,
-leisure activities), 5 informal language markers (percentage of words in
-the text that are assents, fillers, swear words, netspeak, etc), and 12
-punctuation categories (periods, commas, etc).
-
-The open-source [LightSide
-platform](http://ankara.lti.cs.cmu.edu/side/), including the
-machine-learning and feature-extraction core as well as the researcher’s
-workbench UI, has been and continues to be funded in part through
-Carnegie Mellon University, in particular by grants from the National
-Science Foundation and the Office of Naval Research. I used LightSide to
-tag and calculate the frequency of the word “control” as verb and noun,
-respectively.
-
-## 2.3 Data analysis in R
-
-Linear mixed-effects model was used to explore the relationship between
-linguistic features and controllability score at 8 weeks. Participant ID
-was used as a random effect. Potential covariates are age, education,
-employment, marriage status, and race. Didn’t include race or ethnicity
-due to a lack of variations.
-
-Potential Fixed effects are baseline controllability score, the total
-number of words in the post, words per sentence, and the percentage of
-word or punctuation categories of the total number of words in the posts
-for one symptom, for example, percentage of words in the text that are
-pronouns, articles, auxiliary verbs.
-
-Based on the [preliminary bivariate correlation
-test](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/images/Bivariate%20correlation-1.png),
-we have candidate predictors, including baseline controllability score,
-the total number of words, symptom word category, “controlled” words
-category, “controlNN” word category (where the patient used word control
-as a noun), anx (“anxiety” word category), “feel” word category, “body”
-word category, “ingest” word category, “focuspresent” word category,
-“money” word category, “informal” word category, “nonflu”(nonfluency)
-word category, “negate” word category, “discrep”(discrepancy) word
-category, “certain” word category, “Analytic”, Sixltr (words more than
-six letters) word category, prep (prepositions) word category. I used a
-full opinionated approach with iterative forward selection on candidate
-linguistic features to obtain final model 1.
-
-I also used principle components analysis on all the linguistic features
-to extract the underlying constructs and use linear mixed effect model
-to structure the relationship between principle components and
-controllability at 8 weeks. Principle components are chosen if their
-eigenvalues are more than 1. I used iterative backward elimination to
-select principle components to be included in the final model 2.
-
-I compared final models 1 and 2 based on AIC and BIC.
-
-## 2.4 Results
-
-### 2.4.1 Sample characteristics
+## 5.1 Sample characteristics
 
 Participants were predominantly married or Living with
 partner/significant other(75.16%), white (93%), non-hispanic (96.18%).
-Over half of the participants were unemployed (59.24%). The mean of
-[age](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/images/sociodemographic-1.png)
-is 58.18 (SD = 9.72), ranging from [25 to
-81](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/images/sociodemographic-4.png).
-The average of [formal years of
-education](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/images/sociodemographic-5.png)
-is 14.4 (SD=2.72), ranging from
-[10-22](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/images/sociodemographic-8.png)
+Over half of the participants were unemployed (59.24%). The mean of age
+is 58.18 (SD = 9.72) and the average of formal years of education is
+14.4 (SD=2.72).
 
-### 2.4.2 Final model 1
+## 5.2 Principal component analysis (PCA)
 
-After controlling for years of formal years of education and baseline
-controllability score,in the [final
-model](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/images/toy11%20model-1.png),
-total number of words (b= 0.00042,95%CI (8.63e-05, 0.000753)), and
-symptom word category (b= 0.061,95%CI (2.46e-02, 0.098)) is significant
-positive predictor; anxiety (b= 0.056,95%CI (-4.5e-03, 0.12)) and
-informal word categories (b= 0.11,95%CI (-3.91e-03,0.23)) are marginal
-positive predictor on better symptom controllability at 8 weeks. Feel
-(b= -0.038, 95%CI (-6.79e-02, -0.0074)) and focuson present word
-categories (b= -0.018, 95%CI (-3.66e-02, -0.00028)) are significant
-negative predictors; money (b=-0.18,95%CI (-0.37, 0.0025)) and informal
-word categories (b= 0.11,95%CI (-3.91e-03, 0.23)) are marginal negative
-predictors on symptom controllability at 8 weeks. The AIC of the final
-model 1 is 551.16 and the BIC is 595.61.
+PCA yielded 101 components. I included 33 principal components based on
+the eigenvalues (&gt;1), which explains 75.85% of the variance. Here is
+the scree plot of the 33 components.
 
-### 2.4.3 Final model 2
+![screeplot](images/screeplot-1.png)
 
-33 principal components have eigenvalues of more than 1, explaining
-76.8% of the variance. Here is the
-[screeplot](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/images/screeplot-1.png).
+## 5.3 Model of patient perceived symptom controllability
 
-Based on variable loadings on each principal component, I found some
-meaningful underlying constructs. Here are the constructs included in
-the final model and their loadings: [immerse writing of traumatic
-experience](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/images/variable%20loadings-1.png);[confidence
-and
-motivation](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/images/variable%20loadings-2.png);
-[emotionanlly
-distant](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/images/variable%20loadings-3.png);[venting](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/images/variable%20loadings-4.png);[Effort
-to fight
-cancer](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/images/variable%20loadings-5.png);
-[pressure and effort to
-work](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/images/variable%20loadings-6.png);
-[detailed symptom
-description](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/images/variable%20loadings-7.png);
-[financial
-stress](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/images/variable%20loadings-8.png).
+After adjusting for baseline controllability and controlling for
+individuals, their target symptoms, age, education, marital status, the
+detail of the model is listed here:
 
-After controlling for years of formal years of education and baseline
-controllability score, in the [final model
-2](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/images/toy13%20model-1.png),
-“immerse writing of traumatic experience” (b= -0.021,95%CI (-0.045,
-0.0033)) and “pressure and effort to work” (b=-0.041,95%CI (-0.091,
-0.0084)) are marginal negative predictors; “emotionanlly distant from
-symptom experience” (b= -0.046,95%CI (-0.086,-0.0069)) and “financial
-stress” (b= -0.061,95%CI (-0.11,-0.01)) are significant negative
-predictors on symptom controllability at 8 weeks. “Confidence and
-motivation” (b= 0.046,95%CI (0.014,0.079)), “venting”(b= 0.081,95%CI
-(0.038, 0.12)), “effort to fight cancer”(b= 0.072,95%CI (0.027, 0.11)),
-and “detailed symptom description”(b= 0.079,95%CI (0.027, 0.13)) are
-significant positive predictors on better symptom controllability at 8
-weeks. The AIC of the final model 2 is 540.2 and the BIC is 588.35.
+![Mixed-effects model of predicting symptom
+controllability](modelplot.html).
 
-### 2.4.4 Compare final model 1 and 2
+6 underlying constructs were included in the final model and their
+loadings:
 
-Final model 2 is better at capturing the underlying meaningful
-constructs that can predict patient symptom controllability at 8 weeks.
-The AIC and BIC are lower in final model 2 than final model 1.
-Therefore, final model 2 was chosen as the model to explain the
-linguistic reflections of patient-perceived symptom controllability.
+1.Analyze symptom and management
 
-### 2.4.5 Explanation of final model 2
+![Analyze symptom and management](images/C1%20loadings-1.png)
 
-After controlling for participant ID, baseline controllability, and
-participant education, “immerse writing of experience” is a marginal
-negative predictor for controllability at 8 weeks. In the immersive
-writing of a traumatic event, the more authentic and relevant
-participants write their symptom experience (cancer), the more likely
-they relive the event and thus might feel worse and lose control over
-the related traumatic event (dealing with multiple and severe symptoms)
-they are experiencing now.
+2.Social support
 
-After controlling for participant ID, baseline controllability, and
-participant education, “confidence and motivation” is a significant
-positive predictor for controllability at 8 weeks. When cancer survivors
-are confident and motivated to fight against cancer, they are more
-likely to manage the symptoms better.
+![Social support](images/C5%20loadings-1.png)
 
-After controlling for participant ID, baseline controllability, and
-participant education, “emotionally distant” is a significant negative
-predictor for controllability at 8 weeks. In expressive writing, some
-participants wrote rich narratives of their experience and were
-emotionally invested while others were simply informative and
-emotionally distant from the topic. When participants were emotionally
-distant from the event they are dealing with, they are less likely to
-deal with the issues.
+3.  Discuss sexual relationship and concerns
 
-After controlling for participant ID, baseline controllability, and
-participant education, “venting” is a significant positive predictor for
-controllability at 8 weeks. Studies on expressive writing have shown
-that venting help patients release negative emotions and maintain a
-healthy mental state to manage their symptoms better
+![Discuss sexual relationship and concerns](images/C17%20loadings-1.png)
 
-After controlling for participant ID, baseline controllability, and
-participant education, “effort to fight cancer” is a significant
-positive predictor for controllability at 8 weeks. When participants try
-hard to fight cancer and survive, they are more motivated to manage
-their symptoms to have a life of better quality.
+4.Attempt to create narratives of symptom and its management
 
-After controlling for participant ID, baseline controllability, and
-participant education, “pressure and effort to work” is a marginally
-negative predictor for controllability at 8 weeks. When patients talked
-about their work and job, most of them describe how cancer symptoms
-affect their employment or work routine and how their job makes their
-symptoms worse. On the other hand, some types of works aggravate
-patients’ symptoms, such as pain, fatigue, abdominal bloating. Here is
-an example “I have to push myself all day to keep up with my job duties.
-Shortly after I eat lunch, I usually have that ‘sugar’ drop and want to
-crawl in a hole and nap.” “I have to lay in bed for a few days before
-going back to work.”
+![Attempt to create narratives of symptom and its
+management](images/C18%20loadings-1.png)
 
-After controlling for participant ID, baseline controllability, and
-participant education, “detailed symptom description” is a significant
-positive predictor for controllability at 8 weeks. Reflecting and
-describing how symptom affects daily life helps patients think about
-their symptoms in a different way to create a condition for behavior
-change. Patients might be more aware of the limitations of current
-beliefs and behavior. The more participants reflect on their symptoms
-and how they manage them, the more likely they are willing to try new
-strategies to better manage their symptoms.
+5.Informal online writing
 
-After controlling for participant ID, baseline controllability, and
-participant education, “financial stress” is a significant negative
-predictor for controllability at 8 weeks. Many participants talked about
-how financial struggling affects their emotional and social
-participation is not surprising that general loss of control influences
-their perceived sense of control over symptoms, such as depression,
-anxiety.
+![Informal online writing](images/C25%20loadings-1.png)
 
-# 3 Conclusions and implications
+6.  Using symptom management
 
-Based on the controllability of linguistic markers, the patients need to
-reflect their symptoms in a personal and meaningful way although there
-might be a risk that immerse writing can evoke negative emotions. When
-controlled for participants and their baseline controllability scores
-and education, patients who are confident and motivated, tend to release
-negative emotions and make great efforts to fight cancer, in general,
-are more likely to have better control of their symptoms. Those who are
-experiencing stress from employment and finance are more likely to do
-poorly in symptom control.
+![Using symptom management strategies](images/C29%20loadings-1.png)
+
+After adjusting for baseline controllability and controlling for target
+symptoms, participant age, education, marital status, and their ID,
+participant analyzing symptom and management has a positive influence on
+their perceived controllability at 8 weeks (b= 0.02,95%CI (-0.00,
+0.005)). Reflecting and analyzing how the symptom affects daily life and
+how they have dealt with it, promotes patients to think about their
+symptoms differently. This helps create the condition for behavior
+change. Participants might be more aware of the limitations of current
+beliefs and behavior. The more participants reflect on their symptoms,
+management, and effectiveness, the more they are willing to try new
+strategies to manage their symptoms. Moreover, encouraging participants
+to analyze the situation enables them to feel more in control, instead
+of feeling overwhelmed by the emotions and traumatic experience.
+
+Discussing sexual relationships and concerns with the nurse has a
+significant effect on the participant’s sense of controllability (b=
+0.04,95%CI (0, 0.008)). It shows that participants feel safe and
+comfortable talking about their very personal/private information with
+the nurse behind the screen. Discussing such topics engenders
+participants more trust in the nurse and hence facilitates a good
+therapeutic relationship to work on controlling the symptoms as a team.
+
+We also find social support has a significant positive influence on
+participants’ perceived control over their symptoms (b= 0.05,95%CI
+(0.01, 0.09)). Evidence shows strong social support systems — including
+personal connections, links with their communities, and living status
+(single, married, separated) — can improve cancer outcomes, for example,
+lower mortality. Social support helps patients feel more hopeful about
+their diagnosis and dealing with symptoms and other practical issues.
+
+Participants’ attempt to create narratives of symptoms and their
+management gives them more control over the symptoms they are dealing
+with (b=0.04,95%CI (0.00, 0.09)). Giving participants a chance to talk
+and work through their feelings helps them have a full understanding of
+their experience with the symptom. The nurse and participant will obtain
+the whole picture of the issue, which is the foundation for participants
+to analyze the event and feelings, such as the benefits and barriers of
+different symptom management strategies.
+
+Using symptom management strategies is a marginal significant positive
+predictor of symptom controllability at 8 weeks (b= 0.04,95%CI (-0.00,
+0.09)). The use of symptom management strategies measures participant
+behavior engagement with the intervention. When participants practice
+more, they are more likely to understand and master the skills and
+strategies, which engenders a sense of control.
+
+In the end, informal online writing is a marginally significant negative
+predictor of controllability at 8 weeks (b=-0.04,95%CI (-0.09, 0.01)).
+When the participants tend to use informal writing (e.g., standard and
+non-standard abbreviations and acronyms) to hurry typing, they try to
+save time, energy, and effort by writing what they say. Participants are
+less likely to reflect on the questions, analyze their situation, or
+think about the completeness of the answer when they use informal online
+writing, such as netspeak. When the participant doesn’t realize the
+limitations of their symptom management, they are less likely to make
+any changes.
+
+# 6 Conclusions and implications
+
+Based on the linguistic markers of controllability, the patients need to
+reflect and analyze their symptoms in a meaningful way. The first step
+is to try to create complete narratives of symptom representations. When
+controlled for participants’ age, marital status, education, and
+adjusted for baseline controllability scores, participants who have a
+strong social support system, discuss sexual relationships and concerns
+and use symptom management strategies, are more likely to have better
+control of their symptoms. Those who use more online informal writing
+are more likely to do poorly in symptom control.
 
 In contrast to f2f intervention where patients engage with materials in
 a structured and monitored way, and clinicians directly observe
-patients’ behavior and provide feedback, in digital intervention, it is
+patients’ behavior and provide feedback, in digital interventions, it is
 important to target the limited clinician’s attention to patients who
 need it most. The linguistic features identified in the message board
 can help clinicians monitor patients’ sense of control. By identifying
@@ -341,7 +266,7 @@ symptoms before it is too late, the clinicians can provide emotional
 support and tailor the content in time to help those patients control
 their symptoms better.
 
-# 4 Limitations
+# 7 Limitations
 
 There are a few limitations of the study. Some models can’t be compared
 directly because of different data sets. The validity of the study can
@@ -350,7 +275,16 @@ from another content expert; (2) confirmation of a few potential
 outliers in the data set from the primary investigator of the clinical
 trial.
 
-# 5 Project history
+# 8 Data sharing
+
+I used [NLM-Scrubber](https://scrubber.nlm.nih.gov/) to screen
+participants’ posts to create HIPAA-compliant deidentified information.
+For our dataset, it is still possible to reidentify individuals from
+de-identified data with the use of additional information linked to the
+same individuals. Data set can be shared upon request with data use
+agreement.
+
+# 9 Project history
 
 There are several places I struggled a lot. First, I devoted quite a lot
 of time to learning how to de-identify qualitative data sets. But in the
