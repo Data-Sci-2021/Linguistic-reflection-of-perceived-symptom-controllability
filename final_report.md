@@ -153,10 +153,9 @@ the scree plot of the 33 components.
 
 After adjusting for baseline controllability and controlling for
 individuals, their target symptoms, age, education, marital status, the
-detail of the model is listed here:
-
-![Mixed-effects model of predicting symptom
-controllability](modelplot.html).
+detail of the model is listed here: [Mixed-effects model of predicting
+symptom
+controllability](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/modeldetail.pdf)
 
 6 underlying constructs were included in the final model and their
 loadings:
