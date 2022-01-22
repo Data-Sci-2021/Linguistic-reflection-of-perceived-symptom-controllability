@@ -1,4 +1,4 @@
-# Title: Linguistic reflections of perceived symptom controllability for women with recurrent ovarian cancer
+# Linguistic reflections of perceived symptom controllability for women with recurrent ovarian cancer
 
 Contact: Yan Wang yaw75@pitt.edu 
 Date: 13/10/2021
@@ -12,8 +12,10 @@ The dependent variable symptom controllability was measured using Symptom repres
 
 * [**Final_report**](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/final_report.md) This is the final report of the project. 
 * [Final_report.Rmd](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/final_report.Rmd) This is the editable version of the final report of the project. 
-* [Linguistic analysis of controllability](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/Linguistic-analysis-for-symptom-controllability.md) This is the complete analysis for the project. 
-* [Linguistic analysis of controllability.Rmd](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/Linguistic%20analysis%20for%20symptom%20controllability.Rmd) This is the editable version of the complete analysis for the project. 
+* [Data analysis](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/Data-analysis.md) This is the complete analysis for the project. 
+* [Data analysis.Rmd](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/Data-analysis.Rmd) This is the editable version of the complete analysis for the project. 
+* [Data processing](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/Data-processing.md) This is the data processing part before the analysis.
+* [Data processing.Rmd](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/Data-processing.Rmd) This is the editable version of data processing prior to the analysis. 
 * [Project_plan](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/project_plan.md) This is the plan for the project. 
 * [Project_plan.Rmd](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/project_plan.Rmd) This is the editable version of the plan for the project.
 * [Progress_report](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/progress_report.md) This is the the progress report for the project.
