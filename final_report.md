@@ -101,14 +101,14 @@ after adjusting for baseline controllability and controlling for
 individuals, target symptoms, and participant sociodemographic factors,
 not a single individual linguistic variable was statistically
 significant associated with participant controllability. Therefore, I
-decided to use principal components analysis of individual linguistic
-variables to extract the potential underlying constructs and use linear
-mixed effect model to structure the relationship between the components
-and controllability at 8 weeks. Principal components were chosen as
-candidate predictors if their eigenvalues are more than 1. I used the
-iterative backward elimination technique to select principle components,
-controlling for the aforementioned set of covariates(i.e., baseline
-controllability, individuals, target symptoms, and participant
+decided to apply principal components analysis (PCA) on individual
+linguistic variables to extract the potential underlying constructs and
+use linear mixed effect model to structure the relationship between the
+components and controllability at 8 weeks. Principal components were
+chosen as candidate predictors if their eigenvalues are more than 1. I
+used the iterative backward elimination technique to select principle
+components, controlling for the aforementioned set of covariates(i.e.,
+baseline controllability, individuals, target symptoms, and participant
 sociodemographic factors). The criteria I used in selecting models are
 AIC (Akaike’s Information Criteria) and BIC (Bayesian Information
 Criteria).
@@ -125,8 +125,7 @@ The data processing and analysis steps are as the following:
 3.  Export and combined extracted features to a single csv file:
     [ResultsDf8BL(noIDtexts).csv](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/ResultsDf8BL(noIDtexts).csv)
 
-4.  Apply principal component analysis (PCA) and build mixed-effect
-    models:
+4.  Apply PCA and build mixed-effect models:
     [Data-analysis.md](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/Data-analysis.md)
     and
     [Data-analysis.Rmd](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/Data-analysis.Rmd)
@@ -156,6 +155,9 @@ individuals, their target symptoms, age, education, marital status, the
 detail of the model is listed here: [Mixed-effects model of predicting
 symptom
 controllability](https://github.com/Data-Sci-2021/Linguistic-reflection-of-perceived-symptom-controllability/blob/main/modeldetail.pdf)
+
+![Linguistic reflections of
+controllability](images/modfinal%20model-1.png)
 
 6 underlying constructs were included in the final model and their
 loadings:
